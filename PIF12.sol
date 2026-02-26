@@ -14,7 +14,7 @@ contract PIF12 is ERC1155Upgradeable, AccessControlUpgradeable, ERC1155PausableU
     bytes32 public constant GAME_ROLE = keccak256("GAME_ROLE"); // Authorized dApp bots to manage Karma
 
     // ==========================================
-    // Constants (防護時間參數)
+    // Constants (Protection Time Parameters)
     // ==========================================
     uint256 public constant MIN_RECOVERY_DELAY = 48 hours;
     uint256 public constant MAX_RECOVERY_DELAY = 30 days;
@@ -46,10 +46,10 @@ contract PIF12 is ERC1155Upgradeable, AccessControlUpgradeable, ERC1155PausableU
     }
     mapping(address => mapping(uint256 => RecoveryRequest)) public pendingRecoveries; 
 
-    // 狀態追蹤 Mappings
+    // State Tracking Mappings
     mapping(address => uint256) public lastRecoveryTime;
-    mapping(address => uint256) public recoveryDelay;   // 記錄用戶自訂的延遲時間
-    mapping(address => uint256) public lastActiveTime;  // 記錄用戶最後活躍的心跳時間
+    mapping(address => uint256) public recoveryDelay;   // Tracks user-defined recovery delay
+    mapping(address => uint256) public lastActiveTime;  // Tracks user's last active heartbeat timestamp
 
     // ==========================================
     // Events
@@ -140,7 +140,7 @@ contract PIF12 is ERC1155Upgradeable, AccessControlUpgradeable, ERC1155PausableU
 
         karmaPoints[user] = newTotal;
         
-        // 🟢 無感心跳：當用戶獲得或消耗陰德值時，自動更新活躍時間
+        // 🟢 Auto-Heartbeat: Automatically update active timestamp when Karma changes
         lastActiveTime[user] = block.timestamp;
         
         emit KarmaUpdated(user, points, newTotal);
@@ -155,7 +155,7 @@ contract PIF12 is ERC1155Upgradeable, AccessControlUpgradeable, ERC1155PausableU
         require(guardianA != guardianB, "Recovery: Guardians must be different");
         require(guardianA != address(0) && guardianB != address(0), "Recovery: Invalid guardian address");
 
-        // 🔴 動態時間鎖：更換守護者也必須遵守自訂延遲與心跳防護
+        // 🔴 Dynamic Time-Lock: Guardian changes must respect custom delay & heartbeat protection
         uint256 baseDelay = getRecoveryDelay(msg.sender);
         uint256 requiredDelay = baseDelay;
 
@@ -198,7 +198,7 @@ contract PIF12 is ERC1155Upgradeable, AccessControlUpgradeable, ERC1155PausableU
         emit RecoveryInitiated(oldWallet, newWallet, tokenId, msg.sender);
     }
 
-    // 🔴 取消救援改由「守護者」執行，防止被盜私鑰惡意干擾救援
+    // 🔴 Cancellation is executed by guardians to prevent a compromised private key from interfering
     function cancelRecovery(address oldWallet, uint256 tokenId) external whenNotPaused {
         GuardianSet memory guards = customGuardians[oldWallet];
         require(msg.sender == guards.guardianA || msg.sender == guards.guardianB, "Recovery: Only guardians can cancel");
@@ -218,7 +218,7 @@ contract PIF12 is ERC1155Upgradeable, AccessControlUpgradeable, ERC1155PausableU
         require(req.targetWallet == newWallet, "Recovery: Target wallet mismatch");
         require(req.firstApprover != msg.sender, "Recovery: You cannot approve twice");
         
-        // 🔴 修補核心漏網之魚：將執行救援的延遲改為「動態計算（自訂延遲與心跳取大值）」
+        // 🔴 Dynamic Execution Delay: Uses the maximum of custom delay and heartbeat extension
         uint256 baseDelay = getRecoveryDelay(oldWallet);
         uint256 requiredDelay = baseDelay;
 

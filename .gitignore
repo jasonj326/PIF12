@@ -1,0 +1,33 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Archive (local backup of old files, not tracked)
+Archive/
+
+# Environment & secrets
+.env
+.env.local
+*.key
+*.pem
+
+# Node.js (for future scripts)
+node_modules/
+package-lock.json
+
+# IDE
+.vscode/
+.idea/
+
+# Build artifacts
+out/
+cache/
+artifacts/
+
+# Foundry (if used later)
+forge-cache/
+
+# Claude internal
+.claude/

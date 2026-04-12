@@ -571,9 +571,14 @@ contract PIF12 is
         require(balanceOf(newWallet, tokenId) == 0, "Recovery: Target wallet already holds this SBT");
 
         // 6-month cooldown prevents abuse of the recovery mechanism.
+        // Both wallets are checked to prevent cycling attacks (V6 fix).
         require(
             block.timestamp >= lastRecoveryTime[oldWallet] + 180 days,
-            "Recovery: Cannot be recovered again within 6 months"
+            "Recovery: Old wallet cannot be recovered again within 6 months"
+        );
+        require(
+            block.timestamp >= lastRecoveryTime[newWallet] + 180 days,
+            "Recovery: New wallet cannot accept recovery within 6 months"
         );
 
         uint256 balance = balanceOf(oldWallet, tokenId);

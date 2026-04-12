@@ -31,3 +31,4 @@ forge-cache/
 
 # Claude internal
 .claude/
+CLAUDE.md

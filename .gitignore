@@ -32,3 +32,6 @@ forge-cache/
 # Claude internal
 .claude/
 CLAUDE.md
+
+# Working backlog (local only, not for public repo)
+Forge_BACKLOG.md

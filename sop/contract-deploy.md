@@ -168,6 +168,30 @@
 
 ---
 
+## Push 前安全 Checklist（每次 `git push` 前必做）
+
+> 來源：CLia 16-item 架構拍板 W4（2026-04-15）。
+> 適用於 PIF12 repo 的每一次 `git push`，不只是部署時。
+
+**5 項強制檢查，任一未通過不得 push：**
+
+- [ ] **1. `git diff --staged` 人眼掃描**：確認沒有私鑰、助記詞、API key、密碼、.env 內容混入
+- [ ] **2. `gitleaks protect --staged`**：pre-commit hook 會自動跑，但手動再確認一次（hook 可被 `--no-verify` 繞過）
+- [ ] **3. 檢查 `.gitignore` 覆蓋**：`git status` 確認 Archive/、.env、*.key、*.pem、CLAUDE.md、Forge_BACKLOG.md 都不在 staged/untracked
+- [ ] **4. 不用 `git add .`**：永遠具名 `git add path/to/file`（父層 CLAUDE.md W5 規則）
+- [ ] **5. 確認 branch**：`git branch` 確認在正確 branch，不要誤推到 main（如果用 feature branch 流程）
+
+**智能合約專案額外項（PIF12 特有）：**
+
+- [ ] **6. 合約地址/CID 確認**：如果 commit 含合約地址或 IPFS CID，triple-check 是否正確（錯的地址推上 GitHub = 誤導使用者）
+- [ ] **7. 不含 Safe signer 地址對應表**：不記錄「某人 = 0x 地址」的對應關係
+
+> ⚠️ PIF12 是智能合約專案。一旦私鑰進入 git history，即使刪除也**永久可查**。
+> GitHub 的 Secret Scanning + Push Protection 是第二道防線（W3，待 Jason 在 GitHub UI 開啟）。
+> 第一道防線永遠是**你的眼睛 + gitleaks**。
+
+---
+
 ## Emergency / Rollback
 
 **合約是 UUPS upgradeable，bug 可透過升級修復**（除非 upgrade 權限已 renounce，Y5+ 才會做）。

@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# PIF12 pre-commit hook: gitleaks secret scan
+# Installed per CLia 16-item architecture ratification (W2, 2026-04-15)
+#
+# Why this matters: PIF12 is a smart contract project.
+# A leaked private key = funds stolen permanently and irreversibly.
+# This hook blocks commits that contain secrets BEFORE they enter git history.
+#
+# To bypass in emergencies (USE WITH EXTREME CAUTION):
+#   git commit --no-verify -m "message"
+#   ^ Only do this if you are 100% certain the flagged content is a false positive.
+
+echo "🔒 gitleaks: scanning staged changes for secrets..."
+
+gitleaks protect --staged --verbose --redact
+
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -ne 0 ]; then
+    echo ""
+    echo "❌ gitleaks found potential secrets in staged files."
+    echo "   Review the output above. If false positive, use: git commit --no-verify"
+    echo "   If real secret: REMOVE IT, rotate the key, then commit."
+    echo ""
+    exit 1
+fi
+
+echo "✅ gitleaks: no secrets detected. Proceeding with commit."
+exit 0

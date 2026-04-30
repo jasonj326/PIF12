@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PIF12 — 善的循環｜12 年鏈上社會實驗</title>
+<meta name="description" content="PIF12 是一個建立在 Base 區塊鏈上的社會實驗。12 個人、12 年、12 枚不可轉讓的數位御守，共同畫出一個信任的星座。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --deep-navy: #0A1628;
+    --star-gold: #C9A96E;
+    --star-gold-light: #E8D5A8;
+    --soft-white: #F0EDE6;
+    --muted-blue: #2A3F5F;
+    --ink-black: #1A1A1A;
+    --vermilion: #C23B22;
+    --warm-gray: #8A8575;
+    --bg-paper: #F5F0E8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', 'Noto Serif TC', sans-serif;
+    color: var(--soft-white);
+    background: var(--deep-navy);
+    overflow-x: hidden;
+    line-height: 1.8;
+  }
+
+  /* ===== STAR FIELD CANVAS ===== */
+  #starfield {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ===== NAVIGATION ===== */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.2rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(10, 22, 40, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(201, 169, 110, 0.1);
+  }
+
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 1.4rem;
+  }
+
+  .nav-logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--star-gold);
+    letter-spacing: 3px;
+    text-decoration: none;
+  }
+
+  .lang-switch {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid rgba(201, 169, 110, 0.25);
+    border-radius: 999px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+    transition: border-color 0.3s;
+  }
+
+  .lang-switch:hover { border-color: var(--star-gold); }
+
+  .lang-active {
+    color: var(--star-gold);
+    font-weight: 500;
+  }
+
+  .lang-divider {
+    color: var(--warm-gray);
+    opacity: 0.4;
+  }
+
+  .lang-link {
+    color: var(--warm-gray);
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.3s, color 0.3s;
+  }
+
+  .lang-link:hover {
+    opacity: 1;
+    color: var(--star-gold);
+  }
+
+  .nav-links { display: flex; gap: 2rem; }
+
+  .nav-links a {
+    color: var(--soft-white);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+  }
+
+  .nav-links a:hover { opacity: 1; color: var(--star-gold); }
+
+  /* ===== HERO SECTION ===== */
+  .hero {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+  }
+
+  .hero-omamori {
+    width: 120px;
+    height: 160px;
+    margin-bottom: 2.5rem;
+    position: relative;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  .omamori-svg { width: 100%; height: 100%; }
+
+  .hero h1 {
+    font-family: 'Noto Serif TC', serif;
+    font-size: clamp(1.8rem, 5vw, 3.2rem);
+    font-weight: 900;
+    color: var(--soft-white);
+    margin-bottom: 1rem;
+    line-height: 1.4;
+  }
+
+  .hero h1 .gold { color: var(--star-gold); }
+
+  .hero-subtitle {
+    font-size: clamp(0.95rem, 2vw, 1.15rem);
+    color: var(--warm-gray);
+    max-width: 600px;
+    margin-bottom: 3rem;
+    font-weight: 300;
+    line-height: 2;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.9rem 2.2rem;
+    background: transparent;
+    border: 1px solid var(--star-gold);
+    color: var(--star-gold);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    text-decoration: none;
+    transition: all 0.4s;
+    cursor: pointer;
+  }
+
+  .hero-cta:hover {
+    background: var(--star-gold);
+    color: var(--deep-navy);
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0.4;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; transform: translateX(-50%) translateY(0); }
+    50% { opacity: 0.7; transform: translateX(-50%) translateY(6px); }
+  }
+
+  /* ===== SECTION COMMON ===== */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 6rem 2rem;
+  }
+
+  .section-inner {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 4px;
+    color: var(--star-gold);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Noto Serif TC', serif;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 700;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+  }
+
+  .section-body {
+    font-size: 1rem;
+    color: rgba(240, 237, 230, 0.75);
+    line-height: 2;
+  }
+
+  /* ===== WHAT IS SBT ===== */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin: 3rem 0;
+  }
+
+  .compare-card {
+    padding: 2rem;
+    border: 1px solid rgba(201, 169, 110, 0.15);
+    position: relative;
+  }
+
+  .compare-card.highlight {
+    border-color: var(--star-gold);
+    background: rgba(201, 169, 110, 0.05);
+  }
+
+  .compare-card h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    margin-bottom: 1.5rem;
+    color: var(--warm-gray);
+  }
+
+  .compare-card.highlight h3 { color: var(--star-gold); }
+
+  .compare-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin-bottom: 1.2rem;
+    font-size: 0.9rem;
+    color: rgba(240, 237, 230, 0.7);
+  }
+
+  .compare-card.highlight .compare-item { color: var(--soft-white); }
+
+  .compare-icon { font-size: 0.8rem; margin-top: 0.15rem; flex-shrink: 0; }
+
+  /* ===== WHY 12 YEARS ===== */
+  .timeline-items {
+    margin: 3rem 0;
+    position: relative;
+  }
+
+  .timeline-items::before {
+    content: '';
+    position: absolute;
+    left: 1.5rem;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--star-gold), transparent);
+  }
+
+  .timeline-item {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    align-items: flex-start;
+  }
+
+  .timeline-dot {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    border: 1px solid var(--star-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.8rem;
+    color: var(--star-gold);
+    background: var(--deep-navy);
+    position: relative;
+    z-index: 1;
+  }
+
+  .timeline-content h3 {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .timeline-content p {
+    font-size: 0.9rem;
+    color: rgba(240, 237, 230, 0.6);
+    line-height: 1.8;
+  }
+
+  /* ===== HOW IT WORKS ===== */
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin: 3rem 0;
+  }
+
+  .step-card {
+    padding: 2rem 1.5rem;
+    border: 1px solid rgba(201, 169, 110, 0.12);
+    text-align: center;
+    transition: border-color 0.3s;
+  }
+
+  .step-card:hover { border-color: var(--star-gold); }
+
+  .step-number {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 300;
+    color: var(--star-gold);
+    margin-bottom: 1rem;
+    opacity: 0.6;
+  }
+
+  .step-card h3 {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .step-card p {
+    font-size: 0.82rem;
+    color: rgba(240, 237, 230, 0.55);
+    line-height: 1.7;
+  }
+
+  /* ===== QUOTE SECTION ===== */
+  .quote-section {
+    text-align: center;
+    padding: 8rem 2rem;
+    position: relative;
+  }
+
+  .quote-section::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(201, 169, 110, 0.08), transparent);
+    border-radius: 50%;
+  }
+
+  .quote-text {
+    font-family: 'Noto Serif TC', serif;
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    font-weight: 400;
+    color: var(--star-gold-light);
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 2;
+    position: relative;
+    z-index: 1;
+  }
+
+  .quote-author {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.8rem;
+    color: var(--warm-gray);
+    margin-top: 1.5rem;
+    letter-spacing: 2px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ===== CTA SECTION ===== */
+  .cta-section {
+    text-align: center;
+    padding: 6rem 2rem 8rem;
+  }
+
+  .cta-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    max-width: 800px;
+    margin: 3rem auto 0;
+  }
+
+  .cta-card {
+    padding: 2.5rem 1.5rem;
+    border: 1px solid rgba(201, 169, 110, 0.15);
+    text-align: center;
+    transition: all 0.3s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .cta-card:hover {
+    border-color: var(--star-gold);
+    transform: translateY(-4px);
+  }
+
+  .cta-card-icon {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .cta-card h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    margin-bottom: 0.8rem;
+    color: var(--star-gold);
+  }
+
+  .cta-card p {
+    font-size: 0.82rem;
+    color: rgba(240, 237, 230, 0.5);
+    line-height: 1.6;
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    position: relative;
+    z-index: 1;
+    padding: 3rem 2rem;
+    text-align: center;
+    border-top: 1px solid rgba(201, 169, 110, 0.08);
+  }
+
+  .footer-logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9rem;
+    color: var(--star-gold);
+    letter-spacing: 3px;
+    margin-bottom: 0.8rem;
+  }
+
+  .footer-text {
+    font-size: 0.75rem;
+    color: var(--warm-gray);
+    opacity: 0.5;
+  }
+
+  .footer-links {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+  }
+
+  .footer-links a {
+    color: var(--warm-gray);
+    text-decoration: none;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    opacity: 0.6;
+    transition: opacity 0.3s;
+  }
+
+  .footer-links a:hover { opacity: 1; color: var(--star-gold); }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .compare-grid { grid-template-columns: 1fr; }
+    .steps-grid { grid-template-columns: 1fr 1fr; }
+    .cta-grid { grid-template-columns: 1fr; }
+    section { padding: 4rem 1.5rem; }
+  }
+
+  @media (max-width: 480px) {
+    .steps-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ===== ANIMATIONS ===== */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+
+<!-- Navigation -->
+<nav>
+  <div class="nav-left">
+    <a href="#" class="nav-logo">PIF12</a>
+    <div class="lang-switch" aria-label="Language switch">
+      <span class="lang-active">中</span>
+      <span class="lang-divider">|</span>
+      <a href="PIF12_Landing_Page_en.html" class="lang-link">EN</a>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a href="#what">SBT 是什麼</a>
+    <a href="#why">為什麼 12 年</a>
+    <a href="#who">發起人</a>
+    <a href="#how">怎麼運作</a>
+    <a href="#join">參與</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-omamori">
+    <svg class="omamori-svg" viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Omamori body -->
+      <rect x="15" y="30" width="90" height="120" rx="8" fill="url(#omamoriGrad)" stroke="#C9A96E" stroke-width="1.5"/>
+      <!-- Top fold -->
+      <path d="M15 50 L60 35 L105 50" stroke="#C9A96E" stroke-width="1" fill="none"/>
+      <!-- Cord -->
+      <path d="M45 30 Q50 10 60 5 Q70 10 75 30" stroke="#C9A96E" stroke-width="2" fill="none"/>
+      <circle cx="60" cy="5" r="3" fill="#C9A96E"/>
+      <!-- Center kanji -->
+      <text x="60" y="95" text-anchor="middle" fill="#C9A96E" font-family="Noto Serif TC, serif" font-size="22" font-weight="700">御守</text>
+      <!-- Star constellation dots -->
+      <circle cx="35" cy="75" r="1.5" fill="#C9A96E" opacity="0.6"/>
+      <circle cx="50" cy="115" r="1.5" fill="#C9A96E" opacity="0.6"/>
+      <circle cx="75" cy="70" r="1.5" fill="#C9A96E" opacity="0.6"/>
+      <circle cx="85" cy="110" r="1.5" fill="#C9A96E" opacity="0.6"/>
+      <line x1="35" y1="75" x2="75" y2="70" stroke="#C9A96E" stroke-width="0.5" opacity="0.3"/>
+      <line x1="75" y1="70" x2="85" y2="110" stroke="#C9A96E" stroke-width="0.5" opacity="0.3"/>
+      <line x1="85" y1="110" x2="50" y2="115" stroke="#C9A96E" stroke-width="0.5" opacity="0.3"/>
+      <!-- Year label -->
+      <text x="60" y="140" text-anchor="middle" fill="#C9A96E" font-family="Space Grotesk, sans-serif" font-size="8" letter-spacing="2" opacity="0.5">2026</text>
+      <defs>
+        <linearGradient id="omamoriGrad" x1="15" y1="30" x2="105" y2="150">
+          <stop offset="0%" stop-color="#0F1F3A"/>
+          <stop offset="100%" stop-color="#0A1628"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  </div>
+
+  <h1>我認識很多很棒的人<br>但你們<span class="gold">不認識彼此</span>。</h1>
+  <p class="hero-subtitle">科技讓我們連結了全世界，卻讓我們更孤獨。PIF12 是我的一個實驗 — 用鏈上的數位祝福，把生命中最棒的人們連結在一起，走過 12 年。</p>
+  <a href="#what" class="hero-cta">了解這個實驗 ↓</a>
+
+  <div class="scroll-hint">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" stroke-width="1.5">
+      <path d="M12 5v14M5 12l7 7 7-7"/>
+    </svg>
+  </div>
+</section>
+
+<!-- What is SBT -->
+<section id="what">
+  <div class="section-inner fade-in">
+    <p class="section-label">What is Omamori?</p>
+    <h2 class="section-title">你的 Omamori 不是 NFT。<br>它是你「在場」的證明。</h2>
+    <p class="section-body">我一直有一個年度儀式 — 向身邊的人送出祝福和祈願。現在我把這個儀式搬上鏈。Omamori（御守）是日本神社的祝福護身符，PIF12 將它數位化 — 每年鑄造一枚 Soulbound Token，送給願意出現在這段旅程中的人。它不能被購買、不能被轉讓。它唯一的價值，是你真的來了。</p>
+
+    <div class="compare-grid">
+      <div class="compare-card">
+        <h3>一般的 NFT</h3>
+        <div class="compare-item"><span class="compare-icon">×</span><span>可以買賣，價值來自市場炒作</span></div>
+        <div class="compare-item"><span class="compare-icon">×</span><span>持有者通常是匿名投機者</span></div>
+        <div class="compare-item"><span class="compare-icon">×</span><span>持有 = 你有錢</span></div>
+        <div class="compare-item"><span class="compare-icon">×</span><span>今天買，明天賣</span></div>
+      </div>
+      <div class="compare-card highlight">
+        <h3>PIF12 的 OMAMORI（御守）</h3>
+        <div class="compare-item"><span class="compare-icon">✦</span><span>不能買賣、不能轉讓，與你的身份綁定</span></div>
+        <div class="compare-item"><span class="compare-icon">✦</span><span>持有者是被信任的真實人類</span></div>
+        <div class="compare-item"><span class="compare-icon">✦</span><span>持有 = 你被選中、你承諾了</span></div>
+        <div class="compare-item"><span class="compare-icon">✦</span><span>12 年的旅程，不是一次交易</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Why 12 Years -->
+<section id="why">
+  <div class="section-inner fade-in">
+    <p class="section-label">Why 12 Years?</p>
+    <h2 class="section-title">為什麼是 12 年？</h2>
+
+    <div class="timeline-items">
+      <div class="timeline-item">
+        <div class="timeline-dot">干支</div>
+        <div class="timeline-content">
+          <h3>一個完整的生肖輪迴</h3>
+          <p>從馬年開始，到蛇年結束。12 年是東方文化中一個完整的時間週期，代表圓滿與重生。</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot">人</div>
+        <div class="timeline-content">
+          <h3>足夠讓關係真正深化</h3>
+          <p>研究顯示，真正深厚的信任需要 7-10 年的共同經歷。12 年給了我們足夠的時間，讓一群陌生人變成真正的共同體。</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot">問</div>
+        <div class="timeline-content">
+          <h3>一個值得回答的問題</h3>
+          <p>科技讓我們更孤獨了嗎？如果用同樣的科技來建立真實的連結，12 年後會發生什麼？這是我想回答的問題。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About the Founder -->
+<section id="who">
+  <div class="section-inner fade-in">
+    <p class="section-label">About the Founder</p>
+    <h2 class="section-title">我是建順。<br>一個正在學著當 <span class="gold">Legal Builder</span> 的律師。</h2>
+
+    <p class="section-body">本名賴建順——建造順利。年初某天晚上，我盯著紐約一家加密私募基金 Variant Fund 的法務職缺要寫求職信，發現自己拿不出像樣的簡報，索性用 vibe coding（對著電腦自言自語寫程式）做了個一頁式網站當履歷。從那一刻開始，「Builder」這個身份慢慢黏到我身上——意外發現，這個英文字的中文，剛好就是我的名字。</p>
+
+    <p class="section-body" style="margin-top: 1.5rem;">PIF12 不在我的本業裡。沒有募資、沒有 token、御守不能買賣。</p>
+
+    <p class="section-body" style="margin-top: 1.5rem;">那為什麼還做？</p>
+
+    <p class="section-body" style="margin-top: 1rem;">因為從 2018 年進入 web3 產業以來，有一個問題我一直在跟它打架——<span style="color: var(--soft-white);">crypto 真的有用嗎？</span>這個問題我去年用學術的方式試著回答過，寫了一篇論文〈Ponzi or Promise〉。一萬多字寫完，我還是沒有答案。</p>
+
+    <p class="section-body" style="margin-top: 1rem;">所以，<span style="color: var(--star-gold-light);">我想換一種方式回答——用 build 的方式</span>。如果一個技術真的有用，它應該能承載某種具體的、人類社群會在意的價值——例如，跨越時間的祝福、不可轉讓的見證、一個自願加入的社群結構。</p>
+
+    <p class="section-body" style="margin-top: 1.5rem;">至於形式——每年過年我都跟親友、長輩拜年，但意識到大家都在這時候拜年，自己的祝福很容易被淹沒，像棒球場大家都站起來的集體不理性。靈機一動，剛好我也想證明區塊鏈不只是炒作，於是：<span style="color: var(--star-gold-light);">把每年的祝福做成 SBT</span>，送給生命中我佩服的人。「佩福12年」就是這個音譯諧音——也是論語裡的「永言配命，自求多福」。</p>
+
+    <p class="section-body" style="margin-top: 1.5rem;">老實說，這個計畫我從過年講到現在，主辦人的拖延症還沒治好——還沒上鏈，有點汗顏。我把這件事公開寫出來，某種程度上也是在期待親友監督與餵食。希望你多督促我、沒事問問進度。</p>
+
+    <p class="section-body" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(201, 169, 110, 0.15);"><span style="color: var(--star-gold); font-style: italic;">「現階段這是『我』的旅程，不是『我們的』。」</span><br><span style="font-size: 0.85rem; color: var(--warm-gray);">這不是一個組織在招募成員——是一個人在尋找同路人。</span></p>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section id="how">
+  <div class="section-inner fade-in">
+    <p class="section-label">How It Works</p>
+    <h2 class="section-title">四個步驟，不需要懂區塊鏈</h2>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-number">01</div>
+        <h3>每年一枚新的御守</h3>
+        <p>每年一月，一枚全新設計的 Omamori 被鑄造在 Base 區塊鏈上。Year 1 是「馬年御守」。</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">02</div>
+        <h3>用 Email 就能領取</h3>
+        <p>不需要加密錢包，不需要付 gas 費。用你的 email 登入，一鍵領取你的數位御守。</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">03</div>
+        <h3>每年至少見一次面</h3>
+        <p>線上的連結不夠。每年至少一次實體聚會，輪流在不同城市，面對面建立真實的信任。</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">04</div>
+        <h3>互助不是口號</h3>
+        <p>如果你遇到人生困難，社群成員會支持你 — 包括透過 Social Recovery 機制恢復你的數位身份。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quote -->
+<section class="quote-section">
+  <div class="fade-in">
+    <p class="quote-text">「每一個善行都是一顆星。<br>我們一起畫出一個星座。」</p>
+    <p class="quote-author">— JASON J. LAI</p>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="join" class="cta-section">
+  <div class="section-inner fade-in">
+    <p class="section-label">Get Involved</p>
+    <h2 class="section-title">你的旅程從這裡開始</h2>
+
+    <div class="cta-grid">
+      <a href="#" class="cta-card">
+        <div class="cta-card-icon">📜</div>
+        <h3>閱讀白皮書</h3>
+        <p>深入了解 PIF12 的技術架構、治理模型和 12 年願景。</p>
+      </a>
+      <a href="#" class="cta-card">
+        <div class="cta-card-icon">🌟</div>
+        <h3>參加活動</h3>
+        <p>加入我們的星空晚餐或善意工作坊，面對面認識這個社群。</p>
+      </a>
+      <a href="https://github.com/jasonj326/PIF12/" class="cta-card" target="_blank" rel="noopener">
+        <div class="cta-card-icon">⌨</div>
+        <h3>查看程式碼</h3>
+        <p>所有智能合約開源於 GitHub。MIT 授權，歡迎 fork。</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-logo">PIF12</div>
+  <p class="footer-text">Using tech magic to defeat tech loneliness — A 12-Year Journey by Jason J. Lai</p>
+  <div class="footer-links">
+    <a href="https://github.com/jasonj326/PIF12/" target="_blank" rel="noopener">GitHub</a>
+    <a href="#">Whitepaper</a>
+    <a href="#">Base Chain</a>
+  </div>
+</footer>
+
+<script>
+  // ===== STAR FIELD =====
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  let constellationLines = [];
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    initStars();
+  }
+
+  function initStars() {
+    stars = [];
+    const count = Math.floor((canvas.width * canvas.height) / 8000);
+    for (let i = 0; i < count; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 1.5 + 0.3,
+        opacity: Math.random() * 0.6 + 0.1,
+        twinkleSpeed: Math.random() * 0.02 + 0.005,
+        twinkleOffset: Math.random() * Math.PI * 2
+      });
+    }
+    // Create constellation lines between nearby stars
+    constellationLines = [];
+    for (let i = 0; i < Math.min(stars.length, 50); i++) {
+      for (let j = i + 1; j < Math.min(stars.length, 50); j++) {
+        const dx = stars[i].x - stars[j].x;
+        const dy = stars[i].y - stars[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120 && Math.random() > 0.7) {
+          constellationLines.push({ from: i, to: j, opacity: 0.06 });
+        }
+      }
+    }
+  }
+
+  function drawStars(time) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw constellation lines
+    constellationLines.forEach(line => {
+      const from = stars[line.from];
+      const to = stars[line.to];
+      ctx.beginPath();
+      ctx.moveTo(from.x, from.y);
+      ctx.lineTo(to.x, to.y);
+      ctx.strokeStyle = `rgba(201, 169, 110, ${line.opacity})`;
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    });
+
+    // Draw stars
+    stars.forEach(star => {
+      const twinkle = Math.sin(time * star.twinkleSpeed + star.twinkleOffset) * 0.3 + 0.7;
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(232, 213, 168, ${star.opacity * twinkle})`;
+      ctx.fill();
+    });
+
+    requestAnimationFrame(drawStars);
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+  requestAnimationFrame(drawStars);
+
+  // ===== SCROLL ANIMATIONS =====
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

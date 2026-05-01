@@ -23,7 +23,9 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  html { scroll-behavior: smooth; }
+  /* Base font-size: default 16px → 19px (Jason 2026-05-01, two bumps)
+     — every rem-based dimension scales +18.75% automatically. */
+  html { scroll-behavior: smooth; font-size: 19px; }
 
   body {
     font-family: 'Inter', 'Noto Serif TC', sans-serif;
@@ -240,6 +242,46 @@
     line-height: 2;
   }
 
+  /* ===== FOUNDER INTRO ===== */
+  .founder-intro {
+    font-family: 'Noto Serif TC', serif;
+    font-size: clamp(1.15rem, 2.5vw, 1.45rem);
+    font-weight: 400;
+    color: var(--soft-white);
+    line-height: 1.7;
+    margin-top: 1rem;
+  }
+
+  .founder-name {
+    color: var(--star-gold);
+    font-weight: 700;
+  }
+
+  /* ===== FOUNDER TRIES ===== */
+  .founder-tries {
+    margin: 2rem 0 0;
+    padding: 1.8rem 1.8rem 1.8rem 2rem;
+    border-left: 2px solid rgba(201, 169, 110, 0.3);
+    background: rgba(201, 169, 110, 0.025);
+  }
+
+  .founder-try {
+    font-size: 1rem;
+    color: rgba(240, 237, 230, 0.78);
+    line-height: 1.9;
+    margin-bottom: 1rem;
+  }
+
+  .founder-try:last-child {
+    margin-bottom: 0;
+  }
+
+  .try-verb {
+    color: var(--star-gold);
+    font-weight: 500;
+    font-family: 'Noto Serif TC', serif;
+  }
+
   /* ===== WHAT IS SBT ===== */
   .compare-grid {
     display: grid;
@@ -418,9 +460,9 @@
 
   .cta-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
-    max-width: 800px;
+    max-width: 720px;
     margin: 3rem auto 0;
   }
 
@@ -582,7 +624,7 @@
 
   <h1>我認識很多很棒的人<br>但你們<span class="gold">不認識彼此</span>。</h1>
   <p class="hero-subtitle">科技讓我們連結了全世界，卻讓我們更孤獨。PIF12 是我的一個實驗 — 用鏈上的數位祝福，把生命中最棒的人們連結在一起，走過 12 年。</p>
-  <a href="#what" class="hero-cta">了解這個實驗 ↓</a>
+  <a href="#what" class="hero-cta">了解這個實驗 | 佩福12年</a>
 
   <div class="scroll-hint">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" stroke-width="1.5">
@@ -653,23 +695,21 @@
 <section id="who">
   <div class="section-inner fade-in">
     <p class="section-label">About the Founder</p>
-    <h2 class="section-title">我是建順。<br>一個正在學著當 <span class="gold">Legal Builder</span> 的律師。</h2>
+    <h2 class="section-title">Hi 我是 Jason</h2>
 
-    <p class="section-body">本名賴建順——建造順利。年初某天晚上，我盯著紐約一家加密私募基金 Variant Fund 的法務職缺要寫求職信，發現自己拿不出像樣的簡報，索性用 vibe coding（對著電腦自言自語寫程式）做了個一頁式網站當履歷。從那一刻開始，「Builder」這個身份慢慢黏到我身上——意外發現，這個英文字的中文，剛好就是我的名字。</p>
+    <p class="founder-intro">是個喜歡<span style="color: var(--star-gold-light);">一魚多吃</span>的智人，中文本名<span class="founder-name">賴建順</span>。</p>
 
-    <p class="section-body" style="margin-top: 1.5rem;">PIF12 不在我的本業裡。沒有募資、沒有 token、御守不能買賣。</p>
+    <p class="section-body" style="margin-top: 2rem;">PIF12｜佩福12年，是我成為 <span class="gold">Builder</span> 的第一個大型專案。</p>
 
-    <p class="section-body" style="margin-top: 1.5rem;">那為什麼還做？</p>
+    <div class="founder-tries">
+      <p class="founder-try"><span class="try-verb">我試著紀錄：</span>我生命中那些<span style="color: var(--star-gold-light);">佩服</span>的人，雖然來來去去，仍想放在鏈上象徵永恆祝福。</p>
+      <p class="founder-try"><span class="try-verb">我試著回答：</span>沒有技術背景的人與資本的現代智人，透過 AI 可以做出什麼東西。</p>
+      <p class="founder-try"><span class="try-verb">我試著證明：</span>區塊鏈技術，除了機構進場，還可以成為你我的<span style="color: var(--star-gold-light);">遊戲場</span>。</p>
+    </div>
 
-    <p class="section-body" style="margin-top: 1rem;">因為從 2018 年進入 web3 產業以來，有一個問題我一直在跟它打架——<span style="color: var(--soft-white);">crypto 真的有用嗎？</span>這個問題我去年用學術的方式試著回答過，寫了一篇論文〈Ponzi or Promise〉。一萬多字寫完，我還是沒有答案。</p>
+    <p class="section-body" style="margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(201, 169, 110, 0.15);">我發現——<span style="color: var(--soft-white);">打造一個互助成長、跨領域學習的<span style="color: var(--star-gold-light);">遊戲社群</span>，可以三個願望一次滿足</span>。</p>
 
-    <p class="section-body" style="margin-top: 1rem;">所以，<span style="color: var(--star-gold-light);">我想換一種方式回答——用 build 的方式</span>。如果一個技術真的有用，它應該能承載某種具體的、人類社群會在意的價值——例如，跨越時間的祝福、不可轉讓的見證、一個自願加入的社群結構。</p>
-
-    <p class="section-body" style="margin-top: 1.5rem;">至於形式——每年過年我都跟親友、長輩拜年，但意識到大家都在這時候拜年，自己的祝福很容易被淹沒，像棒球場大家都站起來的集體不理性。靈機一動，剛好我也想證明區塊鏈不只是炒作，於是：<span style="color: var(--star-gold-light);">把每年的祝福做成 SBT</span>，送給生命中我佩服的人。「佩福12年」就是這個音譯諧音——也是論語裡的「永言配命，自求多福」。</p>
-
-    <p class="section-body" style="margin-top: 1.5rem;">老實說，這個計畫我從過年講到現在，主辦人的拖延症還沒治好——還沒上鏈，有點汗顏。我把這件事公開寫出來，某種程度上也是在期待親友監督與餵食。希望你多督促我、沒事問問進度。</p>
-
-    <p class="section-body" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(201, 169, 110, 0.15);"><span style="color: var(--star-gold); font-style: italic;">「現階段這是『我』的旅程，不是『我們的』。」</span><br><span style="font-size: 0.85rem; color: var(--warm-gray);">這不是一個組織在招募成員——是一個人在尋找同路人。</span></p>
+    <p class="section-body" style="margin-top: 1.5rem; color: var(--soft-white);">面對無處可躲的科技與演算法，我選擇用科技魔法對抗科技孤毒，邀請你加入。</p>
   </div>
 </section>
 
@@ -682,23 +722,23 @@
     <div class="steps-grid">
       <div class="step-card">
         <div class="step-number">01</div>
-        <h3>每年一枚新的御守</h3>
-        <p>每年一月，一枚全新設計的 Omamori 被鑄造在 Base 區塊鏈上。Year 1 是「馬年御守」。</p>
+        <h3>12 年的御守</h3>
+        <p>每年一枚全新設計的 Omamori 被鑄造在 Base 區塊鏈上。Year 1 是「馬年御守」。</p>
       </div>
       <div class="step-card">
         <div class="step-number">02</div>
-        <h3>用 Email 就能領取</h3>
-        <p>不需要加密錢包，不需要付 gas 費。用你的 email 登入，一鍵領取你的數位御守。</p>
+        <h3>用 Email 領取</h3>
+        <p>不需要加密錢包，目前不需要付 gas 費。用你的 email 登入，一鍵領取你的數位御守。</p>
       </div>
       <div class="step-card">
         <div class="step-number">03</div>
-        <h3>每年至少見一次面</h3>
-        <p>線上的連結不夠。每年至少一次實體聚會，輪流在不同城市，面對面建立真實的信任。</p>
+        <h3>每年實體見面</h3>
+        <p>每年至少一次實體聚會，輪流在不同城市，面對面建立真實的信任。</p>
       </div>
       <div class="step-card">
         <div class="step-number">04</div>
-        <h3>互助不是口號</h3>
-        <p>如果你遇到人生困難，社群成員會支持你 — 包括透過 Social Recovery 機制恢復你的數位身份。</p>
+        <h3>互助 DNA</h3>
+        <p>希望你是樂於助人的怪人——助人的重點是對方需要，而不是自己想給什麼。</p>
       </div>
     </div>
   </div>
@@ -719,20 +759,15 @@
     <h2 class="section-title">你的旅程從這裡開始</h2>
 
     <div class="cta-grid">
-      <a href="#" class="cta-card">
+      <a href="https://github.com/jasonj326/PIF12" class="cta-card" target="_blank" rel="noopener">
         <div class="cta-card-icon">📜</div>
-        <h3>閱讀白皮書</h3>
+        <h3>閱讀白皮書與程式碼</h3>
         <p>深入了解 PIF12 的技術架構、治理模型和 12 年願景。</p>
       </a>
-      <a href="#" class="cta-card">
+      <a href="https://jasonjlai.net/qualia" class="cta-card" target="_blank" rel="noopener">
         <div class="cta-card-icon">🌟</div>
-        <h3>參加活動</h3>
-        <p>加入我們的星空晚餐或善意工作坊，面對面認識這個社群。</p>
-      </a>
-      <a href="https://github.com/jasonj326/PIF12/" class="cta-card" target="_blank" rel="noopener">
-        <div class="cta-card-icon">⌨</div>
-        <h3>查看程式碼</h3>
-        <p>所有智能合約開源於 GitHub。MIT 授權，歡迎 fork。</p>
+        <h3>搶先登記</h3>
+        <p>加入邀請清單，你可以跟 Lia 聊聊這個專案、也可以更認識我。</p>
       </a>
     </div>
   </div>
@@ -740,13 +775,8 @@
 
 <!-- Footer -->
 <footer>
-  <div class="footer-logo">PIF12</div>
+  <div class="footer-logo">PIF12 | 佩福12年</div>
   <p class="footer-text">Using tech magic to defeat tech loneliness — A 12-Year Journey by Jason J. Lai</p>
-  <div class="footer-links">
-    <a href="https://github.com/jasonj326/PIF12/" target="_blank" rel="noopener">GitHub</a>
-    <a href="#">Whitepaper</a>
-    <a href="#">Base Chain</a>
-  </div>
 </footer>
 
 <script>

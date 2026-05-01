@@ -68,7 +68,7 @@
 3. 更新 JSON 中 `image` 欄位為 `ipfs://<image_CID>`
 4. 上傳 JSON 到 IPFS → 取得 `<metadata_CID>`
 5. 驗證：瀏覽器開 `https://ipfs.io/ipfs/<metadata_CID>` 能看到完整 JSON
-6. **記錄 CID 到 `PIF12_Engineering_Notes.md`**（不可逆，永久保存）
+6. **記錄 CID 到 `Forge_engineering_log.md`**（不可逆，永久保存）
 
 > ⚠️ IPFS 上傳後**不能改**。這個 CID 永遠綁在 token URI 上。
 
@@ -161,7 +161,7 @@
 
 1. 通知 Webb 更新 Landing Page（contract address、explorer link、mint 說明）
    - 在 HANDOFF 發 `Forge → Webb` 請求，附：proxy address、metadata CID、explorer URL
-2. 更新 `PIF12_Engineering_Notes.md` 記錄完整部署事件
+2. 更新 `Forge_engineering_log.md` 記錄完整部署事件
 3. 更新 `README.md` 移除 TBC placeholder
 4. git commit + tag `v6.0.0-deployed`
 5. （選配）寫 LinkedIn / X 公告貼文（走 Lex 合規掃描後發）

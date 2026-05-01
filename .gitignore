@@ -33,5 +33,7 @@ forge-cache/
 .claude/
 CLAUDE.md
 
-# Working backlog (local only, not for public repo)
+# Working backlog + engineering log (local only, not for public repo)
 Forge_BACKLOG.md
+Forge_engineering_log.md
+sop/

@@ -1,7 +1,8 @@
 # PIF12: Pay It Forward — A 12-Year On-Chain Social Experiment
 
-**「PIF12：善的循環 — 十二年鏈上社會實驗」**
+**「佩福12年：善的循環 — 十二年鏈上社會實驗」**
 
+[This is subject to full review and revision]
 ---
 
 ## Executive Summary
@@ -131,7 +132,7 @@ The contract uses the Universal Upgradeable Proxy Standard (UUPS), allowing futu
 **Non-Transferability:**
 Omamori tokens are **soulbound** — they cannot be transferred, sold, or burned. Each member's wallet holds the tokens they earned. If a member leaves the project, they retain their historical Omamori as proof of their participation.
 
-### Karma Ledger (道徳台帳)
+### Karma Ledger (福報帳本)
 
 The Karma Ledger is an on-chain integer (ranging from -100,000 to +100,000) tracking each member's moral credit and debt within the community.
 
@@ -156,7 +157,7 @@ To prevent karma from becoming a status game, every year it resets partially. Th
 **Why Non-Zero-Sum?**
 Traditional games have winners and losers. Karma in PIF12 is designed so that **collective generosity increases the total karma in the system**. One member helping three others creates +3 karma (not -1). This shifts the game from competition to cooperation.
 
-### Social Recovery Mechanism (社會復興)
+### Social Recovery Mechanism (社會還原)
 
 Imagine your laptop is stolen, and your Ethereum seed phrase goes with it. In traditional finance, you might lose everything. In Web3, most people resort to using centralized custodians (defeating the purpose of decentralization).
 
@@ -175,14 +176,14 @@ PIF12 offers a third option: **human-based recovery**.
 - **Safe:** The timelock ensures attackers can't instantaneously drain accounts.
 - **Relationship-based:** Encourages genuine friendships and mutual interdependence.
 
-**Lone Wolf Mode (狼爺モード):**
+**Lone Wolf Mode (孤狼模式):**
 Some members may refuse the social recovery option, preferring absolute sovereignty. By enabling Lone Wolf Mode, a member permanently opts out of admin recovery. If they lose their keys, they lose their account — but no one, including Jason, can ever take it.
 
 This escape hatch is crucial for true decentralization.
 
-### Gasless Transactions (無料取引)
+### Gasless Transactions (免費)
 
-PIF12 uses ERC-2771 meta-transactions to enable gasless claims. Members don't need ETH in their wallet to claim annual Omamori. A service provider pays the gas costs; this cost is absorbed by the community's operational budget.
+PIF12 uses ERC-2771 meta-transactions to enable gasless claims. Members don't need ETH in their wallet to claim annual Omamori. A service provider pays the gas costs; this cost is absorbed by the community's operational budget. 
 
 **Why gasless?**
 - Lowers barriers to entry for international members with limited crypto experience
@@ -479,9 +480,8 @@ And relationship problems, we believe, have human solutions.
 
 ---
 
-**Document Version:** 1.0
-**Date:** April 2026
+**Document Version:** 1.1
+**Date:** May 2026
 **Created by:** Jason J. Lai
-**Community Edited by:** PIF12 Core Members
 
 *This whitepaper is a living document. Corrections and improvements are welcome via GitHub issues or community discussions.*

@@ -1,0 +1,11 @@
+{
+  "name": "馬年御守 · 2026",
+  "description": "Pay It Forward 12 — 一份不可轉讓的鏈上祝福。Year of the Horse.",
+  "image": "ipfs://bafybeihpmwj5ekxbqzxrqbksc2css36tk3m23t32rxmaxdbs6buo2x2ck4",
+  "attributes": [
+    { "trait_type": "Year", "value": "Horse 2026" },
+    { "trait_type": "Year Number", "value": 1 },
+    { "trait_type": "Token Type", "value": "Zodiac Year Token" },
+    { "trait_type": "Soulbound", "value": "Yes" }
+  ]
+}

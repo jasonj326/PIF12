@@ -12,9 +12,10 @@ database_name = "pif12-claim"
 database_id = "ceec2775-487a-4c96-b89c-a18c1150b796"
 
 [vars]
-# Sepolia test config (2026-06-19). Switch CHAIN_ID→"1" + CONTRACT_ADDRESS→mainnet proxy for production.
-CHAIN_ID = "11155111"                    # Sepolia testnet (mainnet = "1")
-CONTRACT_ADDRESS = "0x9B41b5A37466449814388678fCB2A5aADAde5233"   # Sepolia proxy
+# Ethereum MAINNET config (2026-06-20). PIF12Nexus v1.0.0 live.
+# (Sepolia test was CHAIN_ID 11155111, proxy 0x9B41b5A37466449814388678fCB2A5aADAde5233.)
+CHAIN_ID = "1"                           # Ethereum mainnet
+CONTRACT_ADDRESS = "0x7491C2916958c4fE97144BBbF502a7A12fa0f67B"   # mainnet proxy (USE THIS)
 ALLOWED_ORIGIN = "https://claim.jasonjlai.net"   # cors also reflects origin, so pages.dev works too
 CURRENT_YEAR = "1"                       # 1 = Horse (2026)
 

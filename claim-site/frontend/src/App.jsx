@@ -97,9 +97,21 @@ export default function App() {
   }
 
   if (phase === 'bad-link') {
+    // No/invalid token = a public visitor with no personal link: greet warmly
+    // (PIF12 is claimed by invite) instead of a cold error. A used/expired/
+    // revoked link still gets an honest, un-alarming line, then the same invite.
+    const isInvalid = reason === 'invalid';
+    // Route the "About PIF12" link to the landing in the reader's language:
+    // zh → the Chinese landing; en/ja → the English landing (no Japanese landing).
+    const pif12Url = lang === 'zh' ? 'https://jasonjlai.net/PIF12/zh/' : 'https://jasonjlai.net/PIF12/';
     return (
-      <Card {...cardProps} title={t.linkUnavailable}>
-        <p className="error">{t['reason_' + reason] || t.reason_invalid}</p>
+      <Card {...cardProps} title={isInvalid ? t.welcomeTitle : t.linkUnavailable}>
+        {!isInvalid && <p className="muted">{t['reason_' + reason] || t.reason_invalid}</p>}
+        <p>{t.welcomeBody}</p>
+        <div className="invite-links">
+          <a href={pif12Url} target="_blank" rel="noreferrer">{t.welcomeReadDocs} →</a>
+          <a href="https://jasonjlai.net/qualia" target="_blank" rel="noreferrer">{t.welcomeChatLia} →</a>
+        </div>
       </Card>
     );
   }

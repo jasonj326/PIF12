@@ -1,0 +1,18 @@
+[profile.default]
+src = "contracts"
+test = "test"
+libs = ["lib"]
+solc = "0.8.28"
+optimizer = true
+optimizer_runs = 1      # dev: max size headroom + fast compile. Custom errors already
+                        # got runtime to 22,841 B (margin +1,735). Production optimizer
+                        # choice (gas vs margin) decided at deploy:
+                        #   runs=1            → 22,841 B  (+1,735)  most headroom
+                        #   runs=200 no-IR    → 24,008 B  (+568)    better gas
+                        #   runs>=~600        → exceeds EIP-170 (24,576)
+# via_ir = false        # legacy pipeline (faster compile; simpler Remix verification)
+# Only compile the v1.0.0 contract; skip the legacy V6/V7 design iterations.
+skip = ["contracts/legacy/**"]
+
+[fmt]
+line_length = 120

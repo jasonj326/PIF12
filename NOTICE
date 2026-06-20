@@ -1,0 +1,22 @@
+PIF12 — NeoPIFNexus
+Copyright (C) 2026 Jason J. Lai
+
+This program is licensed under the GNU General Public License v3.0 or later
+(GPL-3.0-or-later). See the LICENSE file for the full license text.
+
+================================================================================
+THIRD-PARTY COMPONENTS
+================================================================================
+
+This project incorporates the following third-party software, which remains
+under its own license:
+
+OpenZeppelin Contracts (Upgradeable)
+  Copyright (c) OpenZeppelin
+  Licensed under the MIT License.
+  https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable
+
+The MIT License permits inclusion of the above components within this
+GPL-3.0-or-later licensed work. The original MIT copyright and permission
+notices are retained in the respective source files (each imported .sol file
+keeps its own `// SPDX-License-Identifier: MIT` header).

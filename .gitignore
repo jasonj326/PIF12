@@ -10,6 +10,7 @@ Archive/
 # Environment & secrets
 .env
 .env.local
+.dev.vars
 *.key
 *.pem
 
@@ -25,9 +26,15 @@ package-lock.json
 out/
 cache/
 artifacts/
+dist/
+claim-site/worker/.wrangler/
 
-# Foundry (if used later)
+# Foundry — ignore deps + local artifacts only.
+# foundry.toml / remappings.txt / test/ / script/ are PUBLIC (credible repo needs them).
+lib/
+broadcast/
 forge-cache/
+.forge-snapshots/
 
 # Claude internal
 .claude/
@@ -37,3 +44,6 @@ CLAUDE.md
 Forge_BACKLOG.md
 Forge_engineering_log.md
 sop/
+
+# Private technical reference — Jason's own understanding base, NOT for public repo
+website/PIF12_Contract_Architecture.html

@@ -5,13 +5,17 @@
 > 📝 **DRAFT — 2026-05-31 · v1.0.0 (`PIF12Nexus`)**
 > Drafted with the Forge (Claude Code) session for Jason J. Lai's review. Wording is a draft; the project and its intent are Jason's.
 
-> **Version note.** This is the **v1.0.0** whitepaper, describing the deployed `PIF12Nexus` contract on **Ethereum**. An earlier design draft is archived under [`docs/whitepaper/archive/`](./archive/).
+> **Version note.** This is the **v1.0.0** whitepaper, describing the deployed `PIF12Nexus` contract on **Ethereum**. The contract is live on Ethereum mainnet at [`0x7491C2916958c4fE97144BBbF502a7A12fa0f67B`](https://etherscan.io/address/0x7491C2916958c4fE97144BBbF502a7A12fa0f67B) (UUPS proxy, deployed 2026-06-20). An earlier design draft is archived under [`docs/whitepaper/archive/`](./archive/).
 
 ---
 
 ## Executive Summary
 
 **PIF12** (Pay It Forward — 12-Year Legacy) is a twelve-year on-chain experiment in trust and gratitude, deployed on **Ethereum**. Each year, for twelve years, a non-transferable token — shaped after the Japanese *omamori* (御守) — marks a growing circle of people who choose to show up for one another.
+
+PIF12 is also a deliberate response to a quiet problem of our time: technology connected us to everyone, and somehow left us lonelier. As AI makes it easier than ever to operate without needing another person, PIF12 runs the opposite way — using the same on-chain tools not to take people out of the loop, but to weave them back into one.
+
+**What is promised, and what is an experiment.** Two things here are a firm commitment: first, one token a year, every year, for twelve years; second, an annual **in-person gathering** I will hold myself — maybe two or three people, maybe two or three hundred; just thinking about it is fun. Much of the rest — especially the specific game mechanics described later (§5–§6) — is an experiment, and may change: shaped not only by my own capacity, but by how much AI can shoulder for me, and by how much we actually want to keep playing together.
 
 PIF12 v1.0.0 makes one decisive design choice: **there is no score.** What remains is the simplest possible record of human connection:
 
@@ -52,6 +56,8 @@ For years, Jason kept a quiet ritual — sending blessings to people he cared ab
 The form is borrowed from Japan's *omamori* — small temple charms holding a hand-written wish. PIF12 is not religious; it only borrows the spirit of the gesture: something small, deliberate, and *yours*. Each year, one token is minted as a Soulbound Token and given to those willing to walk the twelve-year journey. You can't buy it. You can't transfer it. **Its only value is that you actually came.**
 
 A first circle starts the constellation — open to everyone whose path has crossed ours, with no cap on its size. From Year 2 (2027), as **Lightkeepers** carry the spirit forward, each one lights up another **Star**, and the constellation keeps growing.
+
+And I make one promise of my own. Once a year, every year for twelve years, I will hold an in-person gathering for this circle — and I will be there. Whether others come is a separate matter; the showing up is the whole point. An identity built on *you actually came* deserves, at least once a year, a place to actually come to.
 
 ---
 
@@ -107,6 +113,8 @@ A single `issuanceEnabled` flag gates Layer-2 issuance — deployed off and kept
 ## 5. The Core Metric: Unique-People Counting
 
 This is the heart of v1.0.0, and the cleanest the project has ever been.
+
+> **On what's experimental.** This section and the next (§6) are the *gamification* — the part of PIF12 most likely to evolve. Unlike the twelve-year issuance and the annual in-person gathering, these mechanics are not promises; UUPS upgradeability (§3) exists precisely so they can change as my own capacity, what AI can take on for me, and the community's appetite for the game allow.
 
 Every member's profile is two numbers:
 

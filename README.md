@@ -65,17 +65,17 @@ forge build --sizes   # bytecode under the EIP-170 24 KB limit
 
 ### 📚 Documentation
 
-- **Whitepaper:** [English](./docs/whitepaper/PIF12_Whitepaper_en.md) · 繁體中文（撰寫中）
+- **Whitepaper:** [English](./docs/whitepaper/PIF12_Whitepaper_en.md) · [繁體中文](./docs/whitepaper/PIF12_Whitepaper_zh.md)
 - **Roadmap:** [rolling 3-year roadmap](./docs/PIF12_Rolling_Roadmap.md) — includes the Lightkeeper guide (Star issuance begins Year 2)
 - **License:** [GPL-3.0-or-later](./LICENSE)
 
 ### 📍 Status
 
 - **Version:** v1.0.0 (`PIF12Nexus`)
-- **Stage:** pre-mainnet
+- **Stage:** **live on Ethereum mainnet** — deployed 2026-06-20; Horse-year (Year 1) claiming opens June 21, 2026
 - **Quality:** internal testing + security-reviewed (48 Foundry tests, Slither static analysis); an external security review is anchored **before Star issuance is enabled in Year 2** — Year 1's on-chain surface is deliberately narrow (relay mint + soulbound only)
 - **Governance:** in Years 1–2, contract administration (upgrades, pause, default-wallet recovery) is held by a single founder wallet — a deliberate lightweight start, disclosed here rather than discovered later. It migrates to a community multisig as core members emerge (target Year 3; no contract change required). Until then, any member may opt out of founder-default recovery into Guardian or Lone Wolf mode at any time.
-- **Mainnet proxy:** `TBD`
+- **Mainnet proxy:** [`0x7491C2916958c4fE97144BBbF502a7A12fa0f67B`](https://etherscan.io/address/0x7491C2916958c4fE97144BBbF502a7A12fa0f67B) — UUPS proxy (the stable public address; implementation upgrades happen behind it)
 
 ---
 
@@ -129,17 +129,17 @@ forge build --sizes   # bytecode 在 EIP-170 的 24 KB 上限內
 
 ### 📚 文件
 
-- **白皮書：** [English](./docs/whitepaper/PIF12_Whitepaper_en.md) · 繁體中文（撰寫中）
+- **白皮書：** [English](./docs/whitepaper/PIF12_Whitepaper_en.md) · [繁體中文](./docs/whitepaper/PIF12_Whitepaper_zh.md)
 - **Roadmap：** [滾動式三年路線圖](./docs/PIF12_Rolling_Roadmap.md)（含小太陽指南；星星發行自第二年開始）
 - **授權：** [GPL-3.0-or-later](./LICENSE)
 
 ### 📍 狀態
 
 - **版本：** v1.0.0（`PIF12Nexus`）
-- **階段：** 主網前（pre-mainnet）
+- **階段：** **已上 Ethereum 主網** — 2026-06-20 部署；馬年（第一年）領取於 2026 年 6 月 21 日開放
 - **品質：** 內部測試 + security review（48 個 Foundry 測試、Slither 靜態分析）；外部安全審查錨定在**第二年星星發行啟用之前**——第一年的鏈上介面刻意收窄（僅 relay mint + soulbound）
 - **治理：** 第一、二年期間，合約管理權（升級、暫停、預設錢包恢復）由發起人的單一錢包持有——這是刻意的輕量起步，先講明、不藏著。隨核心成員浮現（預計第三年，2028 猴年），管理權將遷移至含社群成員的多簽錢包；此遷移不需修改合約。在此之前，任何成員都可以隨時把自己的恢復模式改為 Guardian（雙守護人）或孤狼模式，收回這份信任。
-- **主網 Proxy：** `TBD`
+- **主網 Proxy：** [`0x7491C2916958c4fE97144BBbF502a7A12fa0f67B`](https://etherscan.io/address/0x7491C2916958c4fE97144BBbF502a7A12fa0f67B) — UUPS 代理（對外的固定地址；實作合約在其後升級）
 
 ---
 

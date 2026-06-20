@@ -1,0 +1,10 @@
+# Copy to `.dev.vars` (gitignored) for local `wrangler dev`. Real values NEVER
+# go in git or chat. In dev, these override [vars] in wrangler.toml.
+#
+# Sepolia rehearsal values:
+CHAIN_ID="11155111"
+CONTRACT_ADDRESS="0xPROXY_FROM_SEPOLIA_DEPLOY"
+ADMIN_TOKEN="any-random-string-for-dev"
+RELAYER_PRIVATE_KEY="0xSEPOLIA_THROWAWAY_KEY"   # holds only test ETH
+RPC_URL="https://eth-sepolia.g.alchemy.com/v2/YOUR_KEY"
+PRIVY_APP_ID="your-privy-app-id"

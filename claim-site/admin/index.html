@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>PIF12 後台 · Lightkeeper Console</title>
+  <style>
+    :root {
+      --bg:#faf8f3; --card:#fff; --line:#e7e2d6; --text:#2c2a24; --muted:#8a857a;
+      --gold:#9a7b2e; --goldbg:#f3ecda; --danger:#a3402d; --ok:#2e7d57;
+    }
+    * { box-sizing:border-box; }
+    body { background:var(--bg); color:var(--text); font-family:-apple-system,"PingFang TC",system-ui,sans-serif; margin:0; padding:28px 16px; line-height:1.6; }
+    .wrap { max-width:640px; margin:0 auto; }
+    h1 { font-size:18px; font-weight:600; display:flex; align-items:center; gap:8px; margin:0 0 18px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin-bottom:14px; }
+    .card h2 { font-size:14px; font-weight:600; margin:0 0 12px; }
+    label { font-size:12px; color:var(--muted); display:block; margin-bottom:4px; }
+    input, select, textarea { width:100%; font:inherit; font-size:13px; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--text); }
+    textarea { min-height:54px; resize:vertical; font-family:Georgia,"Songti TC",serif; }
+    .row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .field { margin-bottom:12px; }
+    button { font:inherit; font-size:13px; font-weight:500; padding:9px 16px; border-radius:8px; border:1px solid var(--line); background:#fff; color:var(--text); cursor:pointer; }
+    button.primary { background:var(--text); color:#fff; border-color:var(--text); }
+    button.gold { background:var(--gold); color:#fff; border-color:var(--gold); }
+    button:disabled { opacity:.5; cursor:default; }
+    .seg { display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-bottom:12px; }
+    .seg button { border:0; border-radius:0; margin:0; }
+    .seg button.on { background:var(--goldbg); color:var(--gold); }
+    .seg button + button { border-left:1px solid var(--line); }
+    .result { background:var(--goldbg); border-radius:10px; padding:12px 14px; margin-top:12px; display:none; }
+    .result.show { display:block; }
+    .url { font-family:ui-monospace,monospace; font-size:12px; word-break:break-all; color:var(--gold); margin-bottom:8px; }
+    .qr { background:#fff; padding:8px; border-radius:8px; display:inline-block; }
+    .muted { color:var(--muted); font-size:12px; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th { text-align:left; font-weight:400; color:var(--muted); font-size:12px; padding:6px 4px; }
+    td { padding:9px 4px; border-top:1px solid var(--line); vertical-align:top; }
+    .tag-danger { color:var(--danger); cursor:pointer; }
+    .pill { font-size:11px; padding:2px 8px; border-radius:20px; background:var(--goldbg); color:var(--gold); }
+    .hide { display:none; }
+    .gap { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    a { color:var(--gold); }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>PIF12 後台 · Lightkeeper Console <span class="pill" style="font-weight:400">馬年 Y1 · 2026</span></h1>
+
+  <div class="card" id="auth">
+    <h2>連線</h2>
+    <div class="row">
+      <div class="field"><label>API 位址</label><input id="apiBase" placeholder="https://pif12-claim-api.workers.dev" /></div>
+      <div class="field"><label>Admin Token</label><input id="adminToken" type="password" placeholder="貼上 ADMIN_TOKEN" /></div>
+    </div>
+    <button class="primary" onclick="connect()">連線並載入</button>
+    <span id="authMsg" class="muted" style="margin-left:10px;"></span>
+  </div>
+
+  <div id="app" class="hide">
+    <div class="card">
+      <h2>產生領取連結</h2>
+      <div class="seg">
+        <button id="kindSingle" class="on" onclick="setKind('single')">單人連結</button>
+        <button id="kindGroup" onclick="setKind('group')">群組／班級連結</button>
+      </div>
+      <div class="field">
+        <label>領取頁語言（對方打開連結時的預設語言；對方仍可自行切換）</label>
+        <div class="seg" id="langSeg">
+          <button type="button" class="on" data-lang="zh" onclick="setLang('zh')">中文</button>
+          <button type="button" data-lang="en" onclick="setLang('en')">English</button>
+          <button type="button" data-lang="ja" onclick="setLang('ja')">日本語</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>給對方看的感謝話（顯示在領取頁，用對方的語言寫，可留空）</label>
+        <textarea id="message" placeholder="阿哲，謝謝你陪我走過創業最難的那段。"></textarea>
+      </div>
+      <div class="row">
+        <div class="field"><label>備註標籤（只有你看得到）</label><input id="label" placeholder="阿哲 / 六月 Solidity 班" /></div>
+        <div class="field"><label>有效時間</label>
+          <select id="ttl"><option value="72">72 小時</option><option value="168">7 天</option><option value="720">30 天</option><option value="0">不限</option></select>
+        </div>
+      </div>
+      <div class="field hide" id="maxWrap"><label>數量上限（群組，可留空 = 不限直到關閉）</label><input id="maxUses" type="number" min="1" placeholder="40" /></div>
+      <button class="gold" onclick="createLink()" id="genBtn">產生連結 ＋ QR</button>
+
+      <div class="result" id="result">
+        <div class="url" id="resultUrl"></div>
+        <div class="gap" style="margin-bottom:10px;">
+          <button onclick="copyUrl()">複製連結</button>
+          <button onclick="saveToJournal()" id="journalBtn">存進感謝存底</button>
+          <span id="journalMsg" class="muted"></span>
+        </div>
+        <div class="qr" id="qrWrap"><canvas id="qr"></canvas></div>
+        <div id="qrFallback" class="muted hide">QR 暫時無法產生，請改用上方「複製連結」傳給對方。</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>感謝存底 · Gift Journal <span class="muted" id="journalCount">（0 筆）</span></h2>
+      <p class="muted" style="margin-top:0">累積在這台瀏覽器。匯出「完整一本」後，覆蓋本機 <code>Archive/PIF12_Gift_Journal.md</code>（不進公開 Git）。</p>
+      <div class="gap">
+        <button class="primary" onclick="exportJournal()">匯出 PIF12_Gift_Journal.md</button>
+        <button onclick="clearJournal()">清空本機暫存</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>領取連結 <button style="float:right" onclick="loadLinks()">重新整理</button></h2>
+      <table><thead><tr><th>標籤</th><th>類型</th><th>狀態</th><th style="text-align:right">動作</th></tr></thead>
+      <tbody id="linksBody"><tr><td colspan="4" class="muted">按「重新整理」載入</td></tr></tbody></table>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script>
+  let API = '', TOKEN = '', kind = 'single', lang = 'zh', lastUrl = '', lastEntry = null;
+  const LANG_LABEL = { zh: '中', en: 'EN', ja: '日' };
+
+  function auth() { return { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' }; }
+
+  function setLang(l) {
+    lang = l;
+    document.querySelectorAll('#langSeg button').forEach(function (b) {
+      b.classList.toggle('on', b.dataset.lang === l);
+    });
+  }
+
+  function connect() {
+    API = document.getElementById('apiBase').value.trim().replace(/\/$/, '');
+    TOKEN = document.getElementById('adminToken').value.trim();
+    if (!API || !TOKEN) { msg('authMsg', '請填 API 位址與 Token'); return; }
+    sessionStorage.setItem('pif12_api', API);
+    sessionStorage.setItem('pif12_token', TOKEN);
+    document.getElementById('app').classList.remove('hide');
+    renderJournalCount();
+    loadLinks();
+    msg('authMsg', '已連線');
+  }
+
+  function setKind(k) {
+    kind = k;
+    document.getElementById('kindSingle').classList.toggle('on', k === 'single');
+    document.getElementById('kindGroup').classList.toggle('on', k === 'group');
+    document.getElementById('maxWrap').classList.toggle('hide', k !== 'group');
+  }
+
+  async function createLink() {
+    const message = document.getElementById('message').value.trim();
+    const label = document.getElementById('label').value.trim();
+    const ttlHours = Number(document.getElementById('ttl').value);
+    const maxUses = kind === 'group' ? Number(document.getElementById('maxUses').value) || 0 : 1;
+    document.getElementById('genBtn').disabled = true;
+    try {
+      const res = await fetch(API + '/api/admin/links', {
+        method: 'POST', headers: auth(),
+        body: JSON.stringify({ kind, lang, count: 1, ttlHours, maxUses, message, label }),
+      });
+      const out = await res.json();
+      if (!out.ok) throw new Error(out.error || 'failed');
+      lastUrl = out.links[0];
+      lastEntry = { date: new Date().toISOString().slice(0, 10), label, kind, lang, message, token: lastUrl.split('t=')[1] };
+      document.getElementById('resultUrl').textContent = lastUrl;
+      document.getElementById('result').classList.add('show');
+      document.getElementById('journalMsg').textContent = '';
+      loadLinks();
+      showQR(lastUrl); // best-effort: a QR failure must never break link creation
+    } catch (e) {
+      alert('產生失敗：' + e.message);
+    } finally {
+      document.getElementById('genBtn').disabled = false;
+    }
+  }
+
+  // QR is best-effort. Try the preloaded lib, else lazy-load from a fallback CDN,
+  // then degrade to a "copy the link" note — instead of the old hard crash that
+  // threw "QRCode is not defined" and showed a false 產生失敗 alert when the CDN
+  // was blocked. Matters for in-person minting, where the QR has to render.
+  let qrLibPromise = null;
+  function loadQR() {
+    if (window.QRCode) return Promise.resolve(window.QRCode);
+    if (qrLibPromise) return qrLibPromise;
+    const cdns = [
+      'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
+      'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js',
+    ];
+    qrLibPromise = new Promise(function (resolve, reject) {
+      let i = 0;
+      (function next() {
+        if (window.QRCode) return resolve(window.QRCode);
+        if (i >= cdns.length) return reject(new Error('qr lib unavailable'));
+        const s = document.createElement('script');
+        s.src = cdns[i++];
+        s.onload = function () { window.QRCode ? resolve(window.QRCode) : next(); };
+        s.onerror = next;
+        document.head.appendChild(s);
+      })();
+    });
+    return qrLibPromise;
+  }
+
+  async function showQR(url) {
+    const wrap = document.getElementById('qrWrap');
+    const fb = document.getElementById('qrFallback');
+    let ok = false;
+    try {
+      const QR = await loadQR();
+      await new Promise(function (res, rej) {
+        QR.toCanvas(document.getElementById('qr'), url, { width: 132, margin: 1 }, function (e) { e ? rej(e) : res(); });
+      });
+      ok = true;
+    } catch (e) { ok = false; }
+    wrap.classList.toggle('hide', !ok);
+    fb.classList.toggle('hide', ok);
+  }
+
+  function copyUrl() { navigator.clipboard.writeText(lastUrl); msg('journalMsg', '已複製'); }
+
+  function saveToJournal() {
+    if (!lastEntry) return;
+    const j = JSON.parse(localStorage.getItem('pif12_journal') || '[]');
+    j.push(lastEntry);
+    localStorage.setItem('pif12_journal', JSON.stringify(j));
+    renderJournalCount();
+    msg('journalMsg', '已存進感謝存底');
+  }
+
+  function renderJournalCount() {
+    const j = JSON.parse(localStorage.getItem('pif12_journal') || '[]');
+    document.getElementById('journalCount').textContent = '（' + j.length + ' 筆）';
+  }
+
+  function exportJournal() {
+    const j = JSON.parse(localStorage.getItem('pif12_journal') || '[]');
+    const head = [
+      '# PIF12 感謝存底 · Gift Journal', '',
+      '> 🔒 私人檔案，不進公開 Git。放 Archive/（gitignored）。', '',
+      '## 馬年 Y1（2026）', '',
+    ];
+    const lines = j.map(function (e) {
+      const m = (e.message || '').replace(/\s+/g, ' ').trim();
+      const t = (e.token || '').slice(0, 8) + '…';
+      return '- ' + e.date + ' · ' + (e.label || '—') + ' · ' + (e.kind === 'group' ? '群組' : '單人') +
+        ' · [' + (LANG_LABEL[e.lang] || '中') + ']' + (m ? ' · 「' + m + '」' : '') + ' · t=' + t;
+    });
+    download('PIF12_Gift_Journal.md', head.concat(lines).join('\n') + '\n');
+  }
+
+  function clearJournal() {
+    if (!confirm('清空本機暫存？（請先確認已匯出 .md）')) return;
+    localStorage.removeItem('pif12_journal');
+    renderJournalCount();
+  }
+
+  async function loadLinks() {
+    try {
+      const res = await fetch(API + '/api/admin/links', { headers: auth() });
+      const out = await res.json();
+      const body = document.getElementById('linksBody');
+      if (!out.links || !out.links.length) { body.innerHTML = '<tr><td colspan="4" class="muted">還沒有連結</td></tr>'; return; }
+      body.innerHTML = out.links.map(function (l) {
+        return '<tr><td>' + (l.label ? esc(l.label) : '<span class="muted">—</span>') +
+          '</td><td class="muted">' + (l.kind === 'group' ? '群組' : '單人') +
+          '</td><td>' + status(l) + '</td><td style="text-align:right">' +
+          (l.revoked_at || l.used_at ? '<span class="muted">—</span>' : '<span class="tag-danger" onclick="revoke(\'' + l.token + '\')">關閉</span>') +
+          '</td></tr>';
+      }).join('');
+    } catch (e) { /* ignore */ }
+  }
+
+  function status(l) {
+    if (l.revoked_at) return '<span class="muted">已關閉</span>';
+    if (l.expires_at && Math.floor(Date.now() / 1000) > l.expires_at) return '<span class="muted">已過期</span>';
+    if (l.kind === 'group') return l.max_uses ? ('進行中 · ' + l.use_count + '/' + l.max_uses) : ('進行中 · ' + l.use_count);
+    return l.used_at ? '<span style="color:var(--ok)">已領取</span>' : '未領取';
+  }
+
+  async function revoke(token) {
+    if (!confirm('關閉這條連結？')) return;
+    await fetch(API + '/api/admin/revoke', { method: 'POST', headers: auth(), body: JSON.stringify({ token }) });
+    loadLinks();
+  }
+
+  function download(name, text) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: 'text/markdown' }));
+    a.download = name; a.click();
+  }
+  function msg(id, t) { document.getElementById(id).textContent = t; }
+  function esc(s) { return s.replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
+
+  document.getElementById('apiBase').value = sessionStorage.getItem('pif12_api') || '';
+  document.getElementById('adminToken').value = sessionStorage.getItem('pif12_token') || '';
+</script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>領取御守 · Claim · 御守を受け取る｜PIF12</title>
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --card: #141823;
+      --text: #e8e6e1;
+      --muted: #9a968d;
+      --gold: #d4af6a;
+      --error: #e07a6a;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Noto Sans TC", -apple-system, "PingFang TC", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(212, 175, 106, 0.25);
+      border-radius: 16px;
+      max-width: 440px;
+      width: 100%;
+      padding: 36px 32px;
+      text-align: center;
+    }
+    h1 { font-size: 1.35rem; color: var(--gold); margin: 8px 0 16px; }
+    .en { color: var(--muted); font-size: 0.85rem; margin-bottom: 20px; }
+    .langbar { display: flex; justify-content: flex-end; gap: 4px; }
+    .langbtn {
+      width: auto; padding: 4px 10px; margin: 0;
+      font-size: 0.74rem; border-radius: 7px;
+      background: transparent; color: var(--muted);
+      border: 1px solid rgba(212, 175, 106, 0.18);
+    }
+    .langbtn.on { color: #1a1505; background: var(--gold); border-color: var(--gold); }
+    p { line-height: 1.7; font-size: 0.95rem; margin-bottom: 12px; }
+    .muted { color: var(--muted); font-size: 0.83rem; }
+    .addr {
+      font-family: ui-monospace, monospace;
+      font-size: 0.8rem;
+      background: rgba(255,255,255,0.05);
+      padding: 8px 12px;
+      border-radius: 8px;
+      word-break: break-all;
+      margin: 12px 0;
+    }
+    button {
+      background: var(--gold);
+      color: #1a1505;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 28px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
+      width: 100%;
+    }
+    button:disabled { opacity: 0.5; cursor: wait; }
+    .error { color: var(--error); }
+    a { color: var(--gold); }
+    .omamori { font-size: 3rem; margin-bottom: 12px; }
+    .note {
+      border: 1px solid rgba(212, 175, 106, 0.3);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 18px;
+      text-align: left;
+    }
+    .note-label { font-size: 0.72rem; color: var(--muted); margin-bottom: 6px; }
+    .note-body {
+      font-family: Georgia, "Songti TC", serif;
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: var(--text);
+    }
+    .seclist { margin: 0; padding-left: 18px; }
+    .seclist li { line-height: 1.6; font-size: 0.86rem; margin-bottom: 8px; color: var(--text); }
+    .seclist li:last-child { margin-bottom: 0; }
+    .receipt {
+      border: 1px solid rgba(212, 175, 106, 0.3);
+      border-radius: 14px;
+      padding: 20px 18px;
+      margin-bottom: 16px;
+    }
+    .receipt-emblem {
+      width: 54px; height: 54px; margin: 0 auto 10px;
+      background: #1a2030; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; color: var(--gold);
+      font-family: Georgia, "Songti TC", serif;
+    }
+    .receipt-title { font-size: 1rem; color: var(--gold); }
+    .receipt-sub { font-size: 0.72rem; color: var(--muted); margin-bottom: 14px; }
+    .receipt-msg {
+      font-family: Georgia, "Songti TC", serif;
+      font-size: 0.92rem; line-height: 1.75; color: var(--text);
+      border-top: 1px solid rgba(212,175,106,0.2);
+      border-bottom: 1px solid rgba(212,175,106,0.2);
+      padding: 12px 0; margin-bottom: 14px;
+    }
+    .receipt-meta { font-size: 0.78rem; text-align: left; margin-bottom: 12px; }
+    .receipt-meta div { display: flex; justify-content: space-between; padding: 3px 0; }
+    .receipt-meta span { color: var(--muted); }
+    .receipt-meta b { font-weight: 500; font-family: ui-monospace, monospace; font-size: 0.74rem; }
+    .receipt-link { font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+# PIF12 claim API — Cloudflare Worker
+# Deploy requires Jason's explicit approval (project rule).
+
+name = "pif12-claim-api"
+main = "src/index.js"
+compatibility_date = "2026-06-01"
+compatibility_flags = ["nodejs_compat"]   # viem needs node:crypto polyfill on Workers
+
+[[d1_databases]]
+binding = "DB"
+database_name = "pif12-claim"
+database_id = "ceec2775-487a-4c96-b89c-a18c1150b796"
+
+[vars]
+# Sepolia test config (2026-06-19). Switch CHAIN_ID→"1" + CONTRACT_ADDRESS→mainnet proxy for production.
+CHAIN_ID = "11155111"                    # Sepolia testnet (mainnet = "1")
+CONTRACT_ADDRESS = "0x9B41b5A37466449814388678fCB2A5aADAde5233"   # Sepolia proxy
+ALLOWED_ORIGIN = "https://claim.jasonjlai.net"   # cors also reflects origin, so pages.dev works too
+CURRENT_YEAR = "1"                       # 1 = Horse (2026)
+
+# Secrets — set via `wrangler secret put <NAME>` (never commit values):
+#   ADMIN_TOKEN           bearer token for /api/admin/* endpoints
+#   RELAYER_PRIVATE_KEY   GAME_ROLE hot key (fresh key, gas money only;
+#                         admin can rotate anytime via revokeRole+grantRole)
+#   RPC_URL               Alchemy RPC (reads isCurator + broadcasts mint txs)
+#   PRIVY_APP_ID          Privy app id (access-token verification)

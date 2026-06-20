@@ -42,6 +42,7 @@
       font-size: 0.74rem; border-radius: 7px;
       background: transparent; color: var(--muted);
       border: 1px solid rgba(212, 175, 106, 0.18);
+      cursor: pointer;
     }
     .langbtn.on { color: #1a1505; background: var(--gold); border-color: var(--gold); }
     p { line-height: 1.7; font-size: 0.95rem; margin-bottom: 12px; }
@@ -55,7 +56,13 @@
       word-break: break-all;
       margin: 12px 0;
     }
-    button {
+    /* Scope our action-button styles to our own card. Privy renders its login
+       modal as a body-level portal containing bare <button>/<input> elements; a
+       global `button { width:100% }` here leaked in and stretched Privy's email
+       submit button across the email input, intercepting mouse clicks. (Tab still
+       reached the input — the tell that it was a pointer overlay, not a disabled
+       field.) :not(.langbtn) keeps the language switcher unaffected. */
+    .card button:not(.langbtn) {
       background: var(--gold);
       color: #1a1505;
       border: none;
@@ -67,7 +74,7 @@
       margin-top: 10px;
       width: 100%;
     }
-    button:disabled { opacity: 0.5; cursor: wait; }
+    .card button:not(.langbtn):disabled { opacity: 0.5; cursor: wait; }
     .error { color: var(--error); }
     a { color: var(--gold); }
     .omamori { font-size: 3rem; margin-bottom: 12px; }

@@ -4,9 +4,11 @@
 -- "person = 0x address" mapping. So:
 --   - A SINGLE link may carry a personal label/message (e.g. "阿哲") BEFORE it is
 --     claimed — at that point no address is attached, so it is not a mapping.
---   - On a successful single-link claim, label + message are CLEARED (see worker
---     RETAIN_SINGLE_LABELS). The permanent record is then an anonymous claimed
---     link + the on-chain tx. Jason keeps who-got-what offline if he wants it.
+--   - On a successful single-link claim, label + message were CLEARED by default
+--     (anonymous record). As of 2026-06-20 RETAIN_SINGLE_LABELS=true (Jason's
+--     explicit decision): they are KEPT, so message <-> claiming-wallet persists
+--     for the gift ledger + recipient gallery. This consciously relaxes the
+--     no-mapping rule; Jason accepted the trade-off.
 --   - A GROUP link's label ("六月 Solidity 班") and message are collective and map
 --     to many addresses, so they are never a 1:1 identity mapping — kept as-is.
 

@@ -28,10 +28,14 @@ import { mainnet, sepolia } from 'viem/chains';
 const SEL_IS_CURATOR = '0x6c7b79d4'; // cast sig "isCurator(address)"
 const NEXUS_ABI = parseAbi(['function mintCuratorToken(address to, uint8 yearNumber)']);
 
-// Privacy default: clear a single link's personal label/message once claimed, so
-// the DB never holds a "name = address" mapping. Flip to true only if Jason
-// knowingly wants the admin table to keep who-claimed-what.
-const RETAIN_SINGLE_LABELS = false;
+// Single-link label/message retention after claim.
+// Was false (clear on claim — the DB then held no "message <-> address" link, the
+// original PIF12 privacy posture). Set TRUE on 2026-06-20 by Jason's explicit
+// decision: retain so a gift's message persists keyed to the claiming wallet,
+// enabling (a) reconstructing each gift years later and (b) a recipient gallery
+// where a holder logs in and re-reads each year's message. This consciously
+// relaxes the "no person<->address on the server" rule for single-link messages.
+const RETAIN_SINGLE_LABELS = true;
 
 export default {
   async fetch(request, env) {

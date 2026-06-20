@@ -152,7 +152,14 @@ export default function App() {
     return (
       <Card {...cardProps} title={t.litTitle}>
         <div className="receipt">
-          <div className="receipt-emblem">馬</div>
+          <div className="receipt-emblem">
+            <img
+              className="receipt-omamori"
+              src="https://ipfs.io/ipfs/bafybeihpmwj5ekxbqzxrqbksc2css36tk3m23t32rxmaxdbs6buo2x2ck4"
+              alt={t.tokenName}
+              onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement.textContent = '馬'; }}
+            />
+          </div>
           <div className="receipt-title">{t.tokenName}</div>
           <div className="receipt-sub">{t.tokenSub}</div>
           {message && <div className="receipt-msg">{message}</div>}

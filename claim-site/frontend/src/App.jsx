@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { API_BASE, ETHERSCAN } from './config.js';
 import { T, LANGS, pickInitialLang } from './i18n.js';
+import QRCode from 'qrcode';
 
 // Claim flow: link check -> Privy login -> confirm address -> relay mint.
 // The user never signs a transaction and never pays gas (backend relay).
@@ -170,7 +171,7 @@ export default function App() {
       ctx.strokeStyle = 'rgba(212,175,106,0.30)'; ctx.lineWidth = 1.5; ctx.stroke();
       ctx.textAlign = 'center';
       ctx.fillStyle = '#d4af6a'; ctx.font = '600 15px ' + sans;
-      ctx.fillText('PIF12 · 佩福十二年', W / 2, 74);
+      ctx.fillText('PIF12', W / 2, 74);
       const img = await loadKeepsakeImage(OMAMORI_IMG);
       const isz = 300, ix = (W - isz) / 2, iy = 102;
       ctx.save(); roundRect(ctx, ix, iy, isz, isz, 14); ctx.clip();
@@ -188,8 +189,22 @@ export default function App() {
       ctx.fillStyle = '#9a968d'; ctx.font = '13px ' + sans;
       ctx.fillText(t.metaHold + '  ' + shortAddr, W / 2, y); y += 24;
       ctx.fillText(t.metaDate + '  ' + today + '   ·   ' + t.metaKindVal, W / 2, y);
-      ctx.fillStyle = 'rgba(212,175,106,0.7)'; ctx.font = '12px ' + sans;
-      ctx.fillText(t.keepsakeVerify, W / 2, H - 52);
+      // tx QR (BUNDLED qrcode lib — no CDN dependency, so it can't fail the way
+      // the admin console's CDN-loaded QR does) makes the saved keepsake
+      // independently scannable to verify the mint on Etherscan.
+      if (txHash) {
+        try {
+          const qc = document.createElement('canvas');
+          await QRCode.toCanvas(qc, ETHERSCAN + txHash, { width: 132, margin: 2, color: { dark: '#1a1505', light: '#efe7d2' } });
+          const qsz = 124, qx = (W - qsz) / 2, qy = Math.max(y + 30, H - 224);
+          ctx.drawImage(qc, qx, qy, qsz, qsz);
+          ctx.fillStyle = 'rgba(212,175,106,0.78)'; ctx.font = '12px ' + sans;
+          ctx.fillText(t.keepsakeVerify, W / 2, qy + qsz + 26);
+        } catch { /* QR is optional — the keepsake stays valid without it */ }
+      } else {
+        ctx.fillStyle = 'rgba(212,175,106,0.7)'; ctx.font = '12px ' + sans;
+        ctx.fillText(t.keepsakeVerify, W / 2, H - 52);
+      }
       const blob = await new Promise((r) => cv.toBlob(r, 'image/png'));
       if (!blob) throw new Error('no blob');
       triggerDownload(blob, 'PIF12-Horse-omamori-2026.png');
@@ -215,7 +230,7 @@ export default function App() {
     const isInvalid = reason === 'invalid';
     // Route the "About PIF12" link to the landing in the reader's language:
     // zh → the Chinese landing; en/ja → the English landing (no Japanese landing).
-    const pif12Url = lang === 'zh' ? 'https://jasonjlai.net/PIF12/zh/' : 'https://jasonjlai.net/PIF12/';
+    const pif12Url = lang === 'zh' ? 'https://jasonjlai.net/zh/PIF12/' : 'https://jasonjlai.net/PIF12/';
     return (
       <Card {...cardProps} title={isInvalid ? t.welcomeTitle : t.linkUnavailable}>
         {!isInvalid && <p className="muted">{t['reason_' + reason] || t.reason_invalid}</p>}

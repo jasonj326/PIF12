@@ -19,7 +19,7 @@ export const T = {
     reason_used: '這個連結已經使用過了。每條連結只能領取一次。',
     reason_expired: '這個連結已過期。請再跟發給你的人要一條新的。',
     reason_revoked: '這個連結已被取消。',
-    welcomeTitle: '歡迎來到 PIF12 | 佩福十二年',
+    welcomeTitle: '歡迎來到 PIF12 | 佩福 12 年',
     welcomeBody: 'PIF12 的御守憑專屬連結領取。如果我們的人生有過真實的交集，你的連結會來找你。在那之前，歡迎多認識這個專案——或跟 Lia 聊聊，她可以替我跟你說說這件事。',
     welcomeReadDocs: '認識 PIF12',
     welcomeChatLia: '跟 Lia 聊聊',

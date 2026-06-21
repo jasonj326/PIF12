@@ -40,18 +40,33 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-// Centered, wrapped text (handles CJK with no spaces). Returns y below last line.
-function drawWrapped(ctx, text, cx, y, maxW, lineH) {
-  const lines = [];
-  let cur = '';
-  for (const ch of String(text)) {
-    if (ch === '\n') { lines.push(cur); cur = ''; continue; }
-    if (ctx.measureText(cur + ch).width > maxW && cur) { lines.push(cur); cur = ch; }
-    else cur += ch;
+// Word-aware wrap: break at spaces so words stay whole (fixes "Can't w/ait");
+// only character-break a single token wider than maxW (e.g. a long CJK run).
+function wrapLines(ctx, text, maxW) {
+  const out = [];
+  for (const para of String(text).split('\n')) {
+    let line = '';
+    for (const tok of para.split(/(\s+)/)) {
+      if (tok === '') continue;
+      if (/^\s+$/.test(tok)) {
+        if (ctx.measureText(line + ' ').width <= maxW) line += ' ';
+        else { out.push(line); line = ''; }
+        continue;
+      }
+      if (ctx.measureText(line + tok).width <= maxW) { line += tok; continue; }
+      if (line) { out.push(line); line = ''; }
+      if (ctx.measureText(tok).width > maxW) {
+        let cur = '';
+        for (const ch of tok) {
+          if (ctx.measureText(cur + ch).width > maxW && cur) { out.push(cur); cur = ch; }
+          else cur += ch;
+        }
+        line = cur;
+      } else line = tok;
+    }
+    if (line) out.push(line);
   }
-  if (cur) lines.push(cur);
-  for (const ln of lines) { ctx.fillText(ln, cx, y); y += lineH; }
-  return y;
+  return out.map((l) => l.replace(/\s+$/, ''));
 }
 
 function triggerDownload(blob, name) {
@@ -88,6 +103,7 @@ export default function App() {
   const [txHash, setTxHash] = useState('');
   const [errKey, setErrKey] = useState('');
   const [ksBusy, setKsBusy] = useState(false);
+  const [redownload, setRedownload] = useState(null); // re-download data for a used link
 
   function chooseLang(code) { langTouched.current = true; setLang(code); }
 
@@ -101,6 +117,13 @@ export default function App() {
           setMessage(out.message || null);
           if (!urlLang && !langTouched.current && out.lang) setLang(pickInitialLang(null, out.lang));
           setPhase('need-login');
+        } else if (out.redownload) {
+          // Used link, but we have the claim on file → let them re-download.
+          setMessage(out.redownload.message || null);
+          setTxHash(out.redownload.txHash || '');
+          setRedownload(out.redownload);
+          if (!urlLang && !langTouched.current && out.redownload.lang) setLang(pickInitialLang(null, out.redownload.lang));
+          setPhase('redownload');
         } else {
           setReason(out.reason || 'invalid');
           setPhase('bad-link');
@@ -152,9 +175,12 @@ export default function App() {
     if (ksBusy) return;
     setKsBusy(true);
     try {
-      const today = new Date().toISOString().slice(0, 10);
-      const shortAddr = wallet ? wallet.address.slice(0, 6) + '…' + wallet.address.slice(-4) : '';
-      const W = 640, H = 880, S = 2;
+      const addr = (redownload && redownload.address) || (wallet ? wallet.address : '');
+      const shortAddr = addr ? addr.slice(0, 6) + '…' + addr.slice(-4) : '';
+      const today = redownload && redownload.claimedAt
+        ? new Date(redownload.claimedAt * 1000).toISOString().slice(0, 10)
+        : new Date().toISOString().slice(0, 10);
+      const W = 640, H = 1000, S = 2;
       const cv = document.createElement('canvas');
       cv.width = W * S; cv.height = H * S;
       const ctx = cv.getContext('2d');
@@ -163,48 +189,60 @@ export default function App() {
       const serif = 'Georgia, "Songti TC", "Noto Serif TC", serif';
       ctx.fillStyle = '#0b0e14'; ctx.fillRect(0, 0, W, H);
       ctx.fillStyle = 'rgba(212,175,106,0.5)';
-      for (const [sx, sy] of [[70, 90], [560, 70], [120, 770], [540, 800], [92, 430], [580, 450], [300, 46], [330, 836]]) {
+      for (const [sx, sy] of [[64, 80], [576, 70], [108, 884], [560, 904], [84, 612], [584, 628], [300, 48], [344, 946]]) {
         ctx.beginPath(); ctx.arc(sx, sy, 1.4, 0, 7); ctx.fill();
       }
       roundRect(ctx, 28, 28, W - 56, H - 56, 22);
       ctx.fillStyle = '#141823'; ctx.fill();
       ctx.strokeStyle = 'rgba(212,175,106,0.30)'; ctx.lineWidth = 1.5; ctx.stroke();
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#d4af6a'; ctx.font = '600 15px ' + sans;
-      ctx.fillText('PIF12', W / 2, 74);
+      // omamori — the visual centerpiece (>half the card); no separate header
       const img = await loadKeepsakeImage(OMAMORI_IMG);
-      const isz = 300, ix = (W - isz) / 2, iy = 102;
-      ctx.save(); roundRect(ctx, ix, iy, isz, isz, 14); ctx.clip();
+      const isz = 510, ix = (W - isz) / 2, iy = 60;
+      ctx.save(); roundRect(ctx, ix, iy, isz, isz, 16); ctx.clip();
       ctx.drawImage(img, ix, iy, isz, isz);
       ctx.restore();
-      ctx.fillStyle = '#d4af6a'; ctx.font = '600 23px ' + sans;
-      ctx.fillText(t.tokenName, W / 2, iy + isz + 48);
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#d4af6a'; ctx.font = '600 24px ' + sans;
+      ctx.fillText(t.tokenName, W / 2, iy + isz + 46);
       ctx.fillStyle = '#9a968d'; ctx.font = '13px ' + sans;
-      ctx.fillText(t.tokenSub, W / 2, iy + isz + 72);
-      let y = iy + isz + 112;
+      ctx.fillText(t.tokenSub, W / 2, iy + isz + 70);
+      // personal message — a left-bar pull-quote (no quote marks), word-wrapped,
+      // vertically centered in the band between the subtitle and the bottom row.
       if (message) {
-        ctx.fillStyle = '#e8e6e1'; ctx.font = 'italic 17px ' + serif;
-        y = drawWrapped(ctx, '「' + message + '」', W / 2, y, W - 150, 28) + 16;
+        ctx.font = 'italic 19px ' + serif;
+        const mLines = wrapLines(ctx, message, 442);
+        const mLH = 31, mTextX = 116;
+        const bandTop = iy + isz + 100, bandBottom = H - 184;
+        const mTop = bandTop + 22 + Math.max(0, (bandBottom - bandTop - mLines.length * mLH) / 2);
+        ctx.fillStyle = 'rgba(212,175,106,0.55)';
+        ctx.fillRect(92, mTop - 17, 3, mLines.length * mLH - 7);
+        ctx.fillStyle = '#ece9e2'; ctx.textAlign = 'left';
+        mLines.forEach((ln, i) => ctx.fillText(ln, mTextX, mTop + i * mLH));
       }
-      ctx.fillStyle = '#9a968d'; ctx.font = '13px ' + sans;
-      ctx.fillText(t.metaHold + '  ' + shortAddr, W / 2, y); y += 24;
-      ctx.fillText(t.metaDate + '  ' + today + '   ·   ' + t.metaKindVal, W / 2, y);
-      // tx QR (BUNDLED qrcode lib — no CDN dependency, so it can't fail the way
-      // the admin console's CDN-loaded QR does) makes the saved keepsake
-      // independently scannable to verify the mint on Etherscan.
+      // bottom row: tx QR (left) + holder/date meta (right), anchored to bottom
+      const rowTop = H - 160, qsz = 99, metaW = 184; // QR shrunk ~20% from 124
+      const qx = (W - (qsz + 34 + metaW)) / 2;
+      let drewQR = false;
       if (txHash) {
         try {
           const qc = document.createElement('canvas');
           await QRCode.toCanvas(qc, ETHERSCAN + txHash, { width: 132, margin: 2, color: { dark: '#1a1505', light: '#efe7d2' } });
-          const qsz = 124, qx = (W - qsz) / 2, qy = Math.max(y + 30, H - 224);
-          ctx.drawImage(qc, qx, qy, qsz, qsz);
-          ctx.fillStyle = 'rgba(212,175,106,0.78)'; ctx.font = '12px ' + sans;
-          ctx.fillText(t.keepsakeVerify, W / 2, qy + qsz + 26);
-        } catch { /* QR is optional — the keepsake stays valid without it */ }
-      } else {
-        ctx.fillStyle = 'rgba(212,175,106,0.7)'; ctx.font = '12px ' + sans;
-        ctx.fillText(t.keepsakeVerify, W / 2, H - 52);
+          ctx.drawImage(qc, qx, rowTop, qsz, qsz);
+          drewQR = true;
+        } catch { /* QR optional — fall back to centered meta */ }
       }
+      const metaX = drewQR ? qx + qsz + 34 : (W - metaW) / 2;
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#9a968d'; ctx.font = '13px ' + sans;
+      ctx.fillText(t.metaHold + '  ' + shortAddr, metaX, rowTop + 20);
+      ctx.fillStyle = 'rgba(154,150,141,0.72)'; ctx.font = '11px ' + sans;
+      ctx.fillText(t.keepsakeVia, metaX, rowTop + 42);
+      ctx.fillStyle = '#9a968d'; ctx.font = '13px ' + sans;
+      ctx.fillText(t.metaDate + '  ' + today, metaX, rowTop + 69);
+      ctx.fillText(t.metaKindVal, metaX, rowTop + 91);
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'rgba(212,175,106,0.75)'; ctx.font = '12px ' + sans;
+      ctx.fillText(t.keepsakeVerify, W / 2, H - 40);
       const blob = await new Promise((r) => cv.toBlob(r, 'image/png'));
       if (!blob) throw new Error('no blob');
       triggerDownload(blob, 'PIF12-Horse-omamori-2026.png');
@@ -282,6 +320,22 @@ export default function App() {
         <p className="muted" style={{ marginTop: 12 }}>
           <a href="#" onClick={(e) => { e.preventDefault(); logout(); }}>{t.switchAccount}</a>
         </p>
+      </Card>
+    );
+  }
+
+  if (phase === 'redownload') {
+    return (
+      <Card {...cardProps} title={t.redownloadTitle}>
+        <div className="receipt-emblem" style={{ margin: '0 auto 16px' }}>
+          <img className="receipt-omamori" src={OMAMORI_IMG} alt={t.tokenName}
+            onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement.textContent = '馬'; }} />
+        </div>
+        {message && <div className="note"><div className="note-body">{message}</div></div>}
+        <p className="muted">{t.redownloadBody}</p>
+        <button onClick={downloadKeepsake} disabled={ksBusy}>
+          {ksBusy ? t.preparingKeepsake : t.downloadKeepsake}
+        </button>
       </Card>
     );
   }

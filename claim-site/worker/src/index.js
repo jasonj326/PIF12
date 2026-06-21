@@ -71,13 +71,29 @@ export default {
 async function handleLinkCheck(env, token) {
   if (!isHexToken(token)) return json({ valid: false, reason: 'invalid' });
   const row = await env.DB.prepare(
-    'SELECT year, lang, kind, max_uses, use_count, message, expires_at, revoked_at, used_at FROM claim_links WHERE token = ?'
+    'SELECT year, lang, kind, max_uses, use_count, message, tx_hash, expires_at, revoked_at, used_at FROM claim_links WHERE token = ?'
   ).bind(token).first();
 
   if (!row) return json({ valid: false, reason: 'invalid' });
   if (row.revoked_at) return json({ valid: false, reason: 'revoked' });
   if (row.expires_at && now() > row.expires_at) return json({ valid: false, reason: 'expired' });
-  if (isExhausted(row)) return json({ valid: false, reason: 'used' });
+  if (isExhausted(row)) {
+    // Re-download: a used SINGLE link can still surface its keepsake data so the
+    // recipient — who already holds this secret token — can download it again
+    // (e.g. they forgot to save it the first time). No re-mint happens here.
+    if (row.kind === 'single' && row.tx_hash) {
+      const claim = await env.DB.prepare(
+        'SELECT address, claimed_at FROM claims WHERE link_token = ? AND year = ? LIMIT 1'
+      ).bind(token, row.year).first();
+      if (claim) {
+        return json({ valid: false, reason: 'used', redownload: {
+          address: claim.address, txHash: row.tx_hash, message: row.message || null,
+          year: row.year, lang: row.lang || 'zh', claimedAt: claim.claimed_at,
+        } });
+      }
+    }
+    return json({ valid: false, reason: 'used' });
+  }
   return json({ valid: true, year: row.year, lang: row.lang || 'zh', kind: row.kind, message: row.message || null });
 }
 

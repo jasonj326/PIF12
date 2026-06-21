@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PIF12 Keepsake — 祝福語長度測試</title>
+<style>
+  body { margin: 0; background: #0b0e14; color: #e8e6e1;
+    font-family: -apple-system, "PingFang TC", "Noto Sans TC", sans-serif;
+    display: flex; flex-wrap: wrap; gap: 28px; padding: 24px; justify-content: center; }
+  .panel { width: 360px; }
+  h1 { font-size: 16px; color: #d4af6a; margin: 0 0 4px; }
+  p.hint { font-size: 12px; color: #9a968d; line-height: 1.6; margin: 0 0 16px; }
+  .langs { display: inline-flex; border: 1px solid rgba(212,175,106,0.25); border-radius: 8px; overflow: hidden; margin-bottom: 12px; }
+  .langs button { border: 0; background: transparent; color: #9a968d; padding: 6px 14px; font: inherit; font-size: 13px; cursor: pointer; }
+  .langs button + button { border-left: 1px solid rgba(212,175,106,0.25); }
+  .langs button.on { background: #d4af6a; color: #1a1505; }
+  textarea { width: 100%; min-height: 120px; box-sizing: border-box; resize: vertical;
+    background: #141823; color: #e8e6e1; border: 1px solid rgba(212,175,106,0.25);
+    border-radius: 10px; padding: 12px 14px; font: inherit; font-size: 14px;
+    font-family: Georgia, "Songti TC", serif; line-height: 1.7; }
+  .count { font-size: 13px; color: #9a968d; margin-top: 10px; }
+  .count b { color: #e8e6e1; }
+  .warn { color: #e07a6a; }
+  .ok { color: #6fbf8e; }
+  canvas { width: 360px; height: auto; border-radius: 14px; box-shadow: 0 0 40px rgba(0,0,0,0.6); }
+</style>
+</head>
+<body>
+  <div class="panel">
+    <h1>祝福語長度測試 · Keepsake message tester</h1>
+    <p class="hint">這份工具用「跟正式收藏品一模一樣」的版型即時渲染，方便你抓中／英／日各能放多少字。<br>御守圖留白區（祝福語的位置）大約能放 <b>4 行</b>；超過會擠到下方資訊。右邊即時預覽。</p>
+    <div class="langs">
+      <button data-lang="zh" class="on" onclick="setLang('zh')">中文</button>
+      <button data-lang="en" onclick="setLang('en')">English</button>
+      <button data-lang="ja" onclick="setLang('ja')">日本語</button>
+    </div>
+    <textarea id="msg" placeholder="在這裡輸入祝福語…">阿哲，謝謝你陪我走過創業最難的那段。願馬年帶給你勇氣與好運。</textarea>
+    <div class="count" id="count"></div>
+  </div>
+  <canvas id="cv" width="1280" height="2000"></canvas>
+
+<script>
+const OMAMORI_IMG = 'https://ipfs.io/ipfs/bafybeihpmwj5ekxbqzxrqbksc2css36tk3m23t32rxmaxdbs6buo2x2ck4';
+const T = {
+  zh: { tokenName: '馬年御守 · 2026', tokenSub: 'Year of the Horse · PIF12', metaHold: '持有', metaDate: '日期', metaKindVal: 'soulbound · 不可轉讓', keepsakeVia: '透過 Privy / Wallet / Email', keepsakeVerify: '在 Ethereum 上永久可驗證 · PIF12' },
+  en: { tokenName: 'Horse-year omamori · 2026', tokenSub: 'Year of the Horse · PIF12', metaHold: 'Held by', metaDate: 'Date', metaKindVal: 'soulbound · non-transferable', keepsakeVia: 'via Privy / Wallet / Email', keepsakeVerify: 'Permanently verifiable on Ethereum · PIF12' },
+  ja: { tokenName: '午年の御守 · 2026', tokenSub: 'Year of the Horse · PIF12', metaHold: '保有', metaDate: '日付', metaKindVal: 'soulbound · 譲渡不可', keepsakeVia: 'Privy / Wallet / Email 経由', keepsakeVerify: 'Ethereum 上で永久に検証可能 · PIF12' },
+};
+const W = 640, H = 1000, S = 2;
+const sans = '-apple-system, "PingFang TC", "Noto Sans TC", sans-serif';
+const serif = 'Georgia, "Songti TC", "Noto Serif TC", serif';
+let lang = 'zh', omamori = null;
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath(); ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function wrapLines(ctx, text, maxW) {
+  const out = [];
+  for (const para of String(text).split('\n')) {
+    let line = '';
+    for (const tok of para.split(/(\s+)/)) {
+      if (tok === '') continue;
+      if (/^\s+$/.test(tok)) { if (ctx.measureText(line + ' ').width <= maxW) line += ' '; else { out.push(line); line = ''; } continue; }
+      if (ctx.measureText(line + tok).width <= maxW) { line += tok; continue; }
+      if (line) { out.push(line); line = ''; }
+      if (ctx.measureText(tok).width > maxW) {
+        let cur = '';
+        for (const ch of tok) { if (ctx.measureText(cur + ch).width > maxW && cur) { out.push(cur); cur = ch; } else cur += ch; }
+        line = cur;
+      } else line = tok;
+    }
+    if (line) out.push(line);
+  }
+  return out.map((l) => l.replace(/\s+$/, ''));
+}
+
+function draw() {
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.scale(S, S);
+  const t = T[lang];
+  const message = document.getElementById('msg').value;
+  ctx.fillStyle = '#0b0e14'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(212,175,106,0.5)';
+  for (const [sx, sy] of [[64, 80], [576, 70], [108, 884], [560, 904], [84, 612], [584, 628], [300, 48], [344, 946]]) { ctx.beginPath(); ctx.arc(sx, sy, 1.4, 0, 7); ctx.fill(); }
+  roundRect(ctx, 28, 28, W - 56, H - 56, 22); ctx.fillStyle = '#141823'; ctx.fill();
+  ctx.strokeStyle = 'rgba(212,175,106,0.30)'; ctx.lineWidth = 1.5; ctx.stroke();
+  const isz = 510, ix = (W - isz) / 2, iy = 60;
+  if (omamori) { ctx.save(); roundRect(ctx, ix, iy, isz, isz, 16); ctx.clip(); ctx.drawImage(omamori, ix, iy, isz, isz); ctx.restore(); }
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#d4af6a'; ctx.font = '600 24px ' + sans; ctx.fillText(t.tokenName, W / 2, iy + isz + 46);
+  ctx.fillStyle = '#9a968d'; ctx.font = '13px ' + sans; ctx.fillText(t.tokenSub, W / 2, iy + isz + 70);
+  let nLines = 0;
+  if (message) {
+    ctx.font = 'italic 19px ' + serif;
+    const mLines = wrapLines(ctx, message, 442); nLines = mLines.length;
+    const mLH = 31, mTextX = 116, bandTop = iy + isz + 100, bandBottom = H - 184;
+    const mTop = bandTop + 22 + Math.max(0, (bandBottom - bandTop - mLines.length * mLH) / 2);
+    ctx.fillStyle = 'rgba(212,175,106,0.55)'; ctx.fillRect(92, mTop - 17, 3, mLines.length * mLH - 7);
+    ctx.fillStyle = '#ece9e2'; ctx.textAlign = 'left';
+    mLines.forEach((ln, i) => ctx.fillText(ln, mTextX, mTop + i * mLH));
+  }
+  const rowTop = H - 160, qsz = 99, metaW = 184, qx = (W - (qsz + 34 + metaW)) / 2;
+  ctx.fillStyle = '#efe7d2'; roundRect(ctx, qx, rowTop, qsz, qsz, 6); ctx.fill();
+  ctx.fillStyle = '#1a1505'; ctx.textAlign = 'center'; ctx.font = '12px ' + sans; ctx.fillText('[QR]', qx + qsz / 2, rowTop + qsz / 2 + 4);
+  const metaX = qx + qsz + 34; ctx.textAlign = 'left';
+  ctx.fillStyle = '#9a968d'; ctx.font = '13px ' + sans; ctx.fillText(t.metaHold + '  0x5126…6007', metaX, rowTop + 20);
+  ctx.fillStyle = 'rgba(154,150,141,0.72)'; ctx.font = '11px ' + sans; ctx.fillText(t.keepsakeVia, metaX, rowTop + 42);
+  ctx.fillStyle = '#9a968d'; ctx.font = '13px ' + sans; ctx.fillText(t.metaDate + '  2026-06-21', metaX, rowTop + 69); ctx.fillText(t.metaKindVal, metaX, rowTop + 91);
+  ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(212,175,106,0.75)'; ctx.font = '12px ' + sans; ctx.fillText(t.keepsakeVerify, W / 2, H - 40);
+
+  const chars = [...message].length;
+  const fit = nLines <= 4;
+  document.getElementById('count').innerHTML =
+    '字數 <b>' + chars + '</b> · 換行後 <b>' + nLines + '</b> 行 · ' +
+    (fit ? '<span class="ok">放得下 ✓</span>' : '<span class="warn">太長，會擠到下方資訊 ⚠️</span>');
+}
+
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.langs button').forEach((b) => b.classList.toggle('on', b.dataset.lang === l));
+  draw();
+}
+
+const img = new Image(); // display-only, no CORS needed (we never export here)
+img.onload = () => { omamori = img; draw(); };
+img.src = OMAMORI_IMG;
+document.getElementById('msg').addEventListener('input', draw);
+draw();
+</script>
+</body>
+</html>

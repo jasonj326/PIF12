@@ -64,6 +64,9 @@ export const T = {
     downloadKeepsake: '下載收藏（御守＋收據）',
     preparingKeepsake: '準備中…',
     keepsakeVerify: '在 Ethereum 上永久可驗證 · PIF12',
+    keepsakeVia: '透過 Privy / Wallet / Email',
+    redownloadTitle: '你已經領取過了',
+    redownloadBody: '歡迎隨時回來重新下載你的收藏。',
   },
   en: {
     checking: 'Checking your link…',
@@ -117,6 +120,9 @@ export const T = {
     downloadKeepsake: 'Download keepsake (omamori + receipt)',
     preparingKeepsake: 'Preparing…',
     keepsakeVerify: 'Permanently verifiable on Ethereum · PIF12',
+    keepsakeVia: 'via Privy / Wallet / Email',
+    redownloadTitle: 'Already claimed',
+    redownloadBody: 'Welcome back — download your keepsake again anytime.',
   },
   ja: {
     checking: 'リンクを確認しています…',
@@ -170,6 +176,9 @@ export const T = {
     downloadKeepsake: '記念に保存（御守＋受領証）',
     preparingKeepsake: '準備中…',
     keepsakeVerify: 'Ethereum 上で永久に検証可能 · PIF12',
+    keepsakeVia: 'Privy / Wallet / Email 経由',
+    redownloadTitle: 'すでに受け取り済みです',
+    redownloadBody: 'いつでも記念をもう一度ダウンロードできます。',
   },
 };
 

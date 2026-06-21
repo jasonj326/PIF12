@@ -100,7 +100,7 @@
 
     <div class="card">
       <h2>感謝存底 · Gift Journal <span class="muted" id="journalCount">（0 筆）</span></h2>
-      <p class="muted" style="margin-top:0">累積在這台瀏覽器。匯出「完整一本」後，覆蓋本機 <code>Archive/PIF12_Gift_Journal.md</code>（不進公開 Git）。</p>
+      <p class="muted" style="margin-top:0">累積在這台瀏覽器。每次匯出檔名含時間戳（<code>_2026-06-21_013045</code>，不會互相覆蓋），存進本機 <code>Archive/</code>（不進公開 Git）。最新那份最完整。記得常匯出 — localStorage 只在這台瀏覽器。</p>
       <div class="gap">
         <button class="primary" onclick="exportJournal()">匯出 PIF12_Gift_Journal.md</button>
         <button onclick="clearJournal()">清空本機暫存</button>
@@ -237,7 +237,8 @@
     const j = JSON.parse(localStorage.getItem('pif12_journal') || '[]');
     const head = [
       '# PIF12 感謝存底 · Gift Journal', '',
-      '> 🔒 私人檔案，不進公開 Git。放 Archive/（gitignored）。', '',
+      '> 🔒 私人檔案，不進公開 Git。放 Archive/（gitignored）。',
+      '> 匯出時間：' + new Date().toLocaleString('zh-TW') + ' · 共 ' + j.length + ' 筆', '',
       '## 馬年 Y1（2026）', '',
     ];
     const lines = j.map(function (e) {
@@ -246,7 +247,16 @@
       return '- ' + e.date + ' · ' + (e.label || '—') + ' · ' + (e.kind === 'group' ? '群組' : '單人') +
         ' · [' + (LANG_LABEL[e.lang] || '中') + ']' + (m ? ' · 「' + m + '」' : '') + ' · t=' + t;
     });
-    download('PIF12_Gift_Journal.md', head.concat(lines).join('\n') + '\n');
+    // Timestamped filename so each export is preserved, never overwriting an
+    // earlier one. The latest stamp is always the most complete book.
+    download('PIF12_Gift_Journal_' + fileStamp() + '.md', head.concat(lines).join('\n') + '\n');
+  }
+
+  // Local-time, filename-safe stamp: 2026-06-21_013045
+  function fileStamp() {
+    const d = new Date(), p = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) +
+      '_' + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
   }
 
   function clearJournal() {

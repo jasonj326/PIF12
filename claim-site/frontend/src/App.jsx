@@ -8,6 +8,61 @@ import { T, LANGS, pickInitialLang } from './i18n.js';
 // UI is trilingual (中/EN/日); default comes from ?lang=, then the link's
 // admin-set language, then the browser, then Chinese.
 
+const OMAMORI_IMG = 'https://ipfs.io/ipfs/bafybeihpmwj5ekxbqzxrqbksc2css36tk3m23t32rxmaxdbs6buo2x2ck4';
+
+// Load the omamori WITHOUT tainting the canvas: fetch it as a blob first (ipfs.io
+// serves CORS *), so the composited canvas stays exportable via toBlob. Fall back
+// to a crossOrigin <img> if fetch is blocked.
+async function loadKeepsakeImage(url) {
+  try {
+    const res = await fetch(url, { mode: 'cors' });
+    if (!res.ok) throw new Error('fetch failed');
+    return await createImageBitmap(await res.blob());
+  } catch {
+    return await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+// Centered, wrapped text (handles CJK with no spaces). Returns y below last line.
+function drawWrapped(ctx, text, cx, y, maxW, lineH) {
+  const lines = [];
+  let cur = '';
+  for (const ch of String(text)) {
+    if (ch === '\n') { lines.push(cur); cur = ''; continue; }
+    if (ctx.measureText(cur + ch).width > maxW && cur) { lines.push(cur); cur = ch; }
+    else cur += ch;
+  }
+  if (cur) lines.push(cur);
+  for (const ln of lines) { ctx.fillText(ln, cx, y); y += lineH; }
+  return y;
+}
+
+function triggerDownload(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
 export default function App() {
   const { ready, authenticated, login, logout, getAccessToken, exportWallet } = usePrivy();
   const { wallets } = useWallets();
@@ -31,6 +86,7 @@ export default function App() {
   const [message, setMessage] = useState(null); // personal/collective thank-you note
   const [txHash, setTxHash] = useState('');
   const [errKey, setErrKey] = useState('');
+  const [ksBusy, setKsBusy] = useState(false);
 
   function chooseLang(code) { langTouched.current = true; setLang(code); }
 
@@ -88,6 +144,62 @@ export default function App() {
     }
   }
 
+  // One-click keepsake: composite the omamori + receipt into a single PNG so the
+  // recipient can save the whole thing, not just screenshot it. Falls back to the
+  // raw art if the canvas can't be exported (e.g. CORS image load fails).
+  async function downloadKeepsake() {
+    if (ksBusy) return;
+    setKsBusy(true);
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const shortAddr = wallet ? wallet.address.slice(0, 6) + '…' + wallet.address.slice(-4) : '';
+      const W = 640, H = 880, S = 2;
+      const cv = document.createElement('canvas');
+      cv.width = W * S; cv.height = H * S;
+      const ctx = cv.getContext('2d');
+      ctx.scale(S, S);
+      const sans = '-apple-system, "PingFang TC", "Noto Sans TC", sans-serif';
+      const serif = 'Georgia, "Songti TC", "Noto Serif TC", serif';
+      ctx.fillStyle = '#0b0e14'; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = 'rgba(212,175,106,0.5)';
+      for (const [sx, sy] of [[70, 90], [560, 70], [120, 770], [540, 800], [92, 430], [580, 450], [300, 46], [330, 836]]) {
+        ctx.beginPath(); ctx.arc(sx, sy, 1.4, 0, 7); ctx.fill();
+      }
+      roundRect(ctx, 28, 28, W - 56, H - 56, 22);
+      ctx.fillStyle = '#141823'; ctx.fill();
+      ctx.strokeStyle = 'rgba(212,175,106,0.30)'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#d4af6a'; ctx.font = '600 15px ' + sans;
+      ctx.fillText('PIF12 · 佩福十二年', W / 2, 74);
+      const img = await loadKeepsakeImage(OMAMORI_IMG);
+      const isz = 300, ix = (W - isz) / 2, iy = 102;
+      ctx.save(); roundRect(ctx, ix, iy, isz, isz, 14); ctx.clip();
+      ctx.drawImage(img, ix, iy, isz, isz);
+      ctx.restore();
+      ctx.fillStyle = '#d4af6a'; ctx.font = '600 23px ' + sans;
+      ctx.fillText(t.tokenName, W / 2, iy + isz + 48);
+      ctx.fillStyle = '#9a968d'; ctx.font = '13px ' + sans;
+      ctx.fillText(t.tokenSub, W / 2, iy + isz + 72);
+      let y = iy + isz + 112;
+      if (message) {
+        ctx.fillStyle = '#e8e6e1'; ctx.font = 'italic 17px ' + serif;
+        y = drawWrapped(ctx, '「' + message + '」', W / 2, y, W - 150, 28) + 16;
+      }
+      ctx.fillStyle = '#9a968d'; ctx.font = '13px ' + sans;
+      ctx.fillText(t.metaHold + '  ' + shortAddr, W / 2, y); y += 24;
+      ctx.fillText(t.metaDate + '  ' + today + '   ·   ' + t.metaKindVal, W / 2, y);
+      ctx.fillStyle = 'rgba(212,175,106,0.7)'; ctx.font = '12px ' + sans;
+      ctx.fillText(t.keepsakeVerify, W / 2, H - 52);
+      const blob = await new Promise((r) => cv.toBlob(r, 'image/png'));
+      if (!blob) throw new Error('no blob');
+      triggerDownload(blob, 'PIF12-Horse-omamori-2026.png');
+    } catch {
+      window.open(OMAMORI_IMG, '_blank', 'noopener'); // fallback: at least the art
+    } finally {
+      setKsBusy(false);
+    }
+  }
+
   const cardProps = { lang, onLang: chooseLang };
 
   // ---------- render ----------
@@ -111,6 +223,7 @@ export default function App() {
         <div className="invite-links">
           <a href={pif12Url} target="_blank" rel="noreferrer">{t.welcomeReadDocs} →</a>
           <a href="https://jasonjlai.net/qualia" target="_blank" rel="noreferrer">{t.welcomeChatLia} →</a>
+          <a href="mailto:hello@jasonjlai.net?subject=PIF12%20catch-up">{t.welcomeReconnect} →</a>
         </div>
       </Card>
     );
@@ -167,7 +280,7 @@ export default function App() {
           <div className="receipt-emblem">
             <img
               className="receipt-omamori"
-              src="https://ipfs.io/ipfs/bafybeihpmwj5ekxbqzxrqbksc2css36tk3m23t32rxmaxdbs6buo2x2ck4"
+              src={OMAMORI_IMG}
               alt={t.tokenName}
               onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement.textContent = '馬'; }}
             />
@@ -182,7 +295,10 @@ export default function App() {
           </div>
           <a className="receipt-link" href={ETHERSCAN + txHash} target="_blank" rel="noreferrer">{t.viewTx}</a>
         </div>
-        <p className="muted">{t.welcome}<br />{t.screenshot}</p>
+        <button onClick={downloadKeepsake} disabled={ksBusy}>
+          {ksBusy ? t.preparingKeepsake : t.downloadKeepsake}
+        </button>
+        <p className="muted" style={{ marginTop: 12 }}>{t.welcome}<br />{t.screenshot}</p>
         {isEmbedded && (
           <p className="muted" style={{ marginTop: 12 }}>
             <a href="#" onClick={(e) => { e.preventDefault(); exportWallet({ address: wallet.address }); }}>{t.exportKey}</a>
